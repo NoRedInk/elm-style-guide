@@ -1,4 +1,6 @@
-# [NoRedInk](https://www.noredink.com/jobs)'s Elm Style Guide
+# Elm Style Guide
+
+These are the guidelines we follow when writing [Elm](http://elm-lang.org) code at [NoRedInk](https://www.noredink.com/jobs).
 
 We start with the official [Elm Style Guide](http://elm-lang.org/docs/style-guide) and then add the following.
 
