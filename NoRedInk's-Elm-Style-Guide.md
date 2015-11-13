@@ -34,12 +34,12 @@ Instead of this:
 
 ```elm
 UpdateInviteCode str ->
-    { model | inviteCode <- str } => Effects.none
+    { model | inviteCode <- str }
 
 ReenterInviteCode ->
     { model | inviteCode <- ""
     , formStep <- WaitingForInviteCode
-    } => Effects.task (focusInviteCodeField addresses)
+    }
 ```
 
 Do this:
@@ -48,13 +48,13 @@ Do this:
 UpdateInviteCode str ->
     { model
          | inviteCode <- str
-    } => Effects.none
+    }
 
 ReenterInviteCode ->
     { model
          | inviteCode <- ""
          , formStep <- WaitingForInviteCode
-    } => Effects.task (focusInviteCodeField addresses)
+    }
 ```
 
 ## Use descriptive names instead of apostrophes
