@@ -34,11 +34,11 @@ Instead of this:
 
 ```elm
 UpdateInviteCode str ->
-    { model | inviteCode <- str }
+    { model | inviteCode = str }
 
 ReenterInviteCode ->
-    { model | inviteCode <- ""
-    , formStep <- WaitingForInviteCode
+    { model | inviteCode = ""
+    , formStep = WaitingForInviteCode
     }
 ```
 
@@ -47,13 +47,13 @@ Do this:
 ```elm
 UpdateInviteCode str ->
     { model
-         | inviteCode <- str
+         | inviteCode = str
     }
 
 ReenterInviteCode ->
     { model
-         | inviteCode <- ""
-         , formStep <- WaitingForInviteCode
+         | inviteCode = ""
+         , formStep = WaitingForInviteCode
     }
 ```
 
@@ -66,7 +66,7 @@ Instead of this:
 markDirty model =
     let
         model' =
-            { model | dirty <- True }
+            { model | dirty = True }
     in
         model'
 ```
@@ -78,7 +78,7 @@ markDirty model =
 markDirty model =
     let
         dirtyModel =
-            { model | dirty <- True }
+            { model | dirty = True }
     in
         dirtyModel
 ```
