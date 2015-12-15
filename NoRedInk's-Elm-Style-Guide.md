@@ -203,3 +203,10 @@ algoliaResult =
         |: ("state" := string)
         |: ("zip" := string)
 ```
+
+where `|:` is defined as
+
+```elm
+import Json.Decode.Extra
+(|:) = Json.Decode.Extra.apply
+```
