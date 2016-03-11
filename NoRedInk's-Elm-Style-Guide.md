@@ -1,5 +1,7 @@
 These are the guidelines we follow when writing [Elm](http://elm-lang.org) code at [NoRedInk](https://www.noredink.com/jobs).
 
+Use elm-format.
+
 We start with the official [Elm Style Guide](http://elm-lang.org/docs/style-guide) and then add the following.
 
 ## Always put [`if`](http://elm-lang.org/docs/syntax#conditionals) and [`then`](http://elm-lang.org/docs/syntax#conditionals) on the same line
