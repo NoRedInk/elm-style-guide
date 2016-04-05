@@ -154,3 +154,6 @@ algoliaResult =
 ```
 
 This will also make it easier to add [optional fields](http://package.elm-lang.org/packages/NoRedInk/elm-decode-pipeline/1.0.0/Json-Decode-Pipeline#optional) where necessary.
+
+[json2elm](http://json2elm.org/) can generate pipeline-style decoders from
+raw JSON.
