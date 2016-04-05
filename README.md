@@ -117,7 +117,7 @@ customDecoder string
           Result.Ok 3
 ```
 
-## Always use [`|:`](https://github.com/circuithub/elm-json-extra/blob/master/src/Json/Decode/Extra.elm#L90-L113) instead of [`objectN`](http://package.elm-lang.org/packages/elm-lang/core/2.1.0/Json-Decode#object2)
+## Always use [`Json.Decode.Pipeline`](https://github.com/NoRedInk/elm-decode-pipeline) instead of [`objectN`](http://package.elm-lang.org/packages/elm-lang/core/2.1.0/Json-Decode#object2)
 
 Even though this would work...
 
@@ -125,13 +125,13 @@ Even though this would work...
 -- Don't do this --
 algoliaResult : Decoder AlgoliaResult
 algoliaResult =
-    object6 AlgoliaResult
-        ("id" := int)
-        ("name" := string)
-        ("address" := string)
-        ("city" := string)
-        ("state" := string)
-        ("zip" := string)
+  object6 AlgoliaResult
+    ("id" := int)
+    ("name" := string)
+    ("address" := string)
+    ("city" := string)
+    ("state" := string)
+    ("zip" := string)
 ```
 
 ...it's inconsistent with the longer decoders, and must be refactored if we want to add more fields.
@@ -140,22 +140,17 @@ Instead do this from the start:
 
 ```elm
 -- Instead do this --
-import Util.Decoder.Extra exposing ((|:))
+import Json.Decode.Pipeline exposing (required, decode)
 
 algoliaResult : Decoder AlgoliaResult
 algoliaResult =
-    succeed AlgoliaResult
-        |: ("id" := int)
-        |: ("name" := string)
-        |: ("address" := string)
-        |: ("city" := string)
-        |: ("state" := string)
-        |: ("zip" := string)
+  decode AlgoliaResult
+    |> required "id" int
+    |> required "name" string
+    |> required "address" string
+    |> required "city" string
+    |> required "state" string
+    |> required "zip" string
 ```
 
-where `|:` is defined as
-
-```elm
-import Json.Decode.Extra
-(|:) = Json.Decode.Extra.apply
-```
+This will also make it easier to add [optional fields](http://package.elm-lang.org/packages/NoRedInk/elm-decode-pipeline/1.0.0/Json-Decode-Pipeline#optional) where necessary.
