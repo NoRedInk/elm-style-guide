@@ -1,63 +1,10 @@
 These are the guidelines we follow when writing [Elm](http://elm-lang.org) code at [NoRedInk](https://www.noredink.com/jobs).
 
-Use elm-format.
+## Use [`elm-format`](https://github.com/avh4/elm-format) on all files
 
-We start with the official [Elm Style Guide](http://elm-lang.org/docs/style-guide) and then add the following.
-
-## Always put [`if`](http://elm-lang.org/docs/syntax#conditionals) and [`then`](http://elm-lang.org/docs/syntax#conditionals) on the same line
-
-Instead of this:
-
-```elm
--- Don't do this --
-if isOdd number
-    then Odd
-    else
-        if isEven number
-            then Even
-            else WhoaCrazyNumber
-```
-
-...put `then` on the same line, and indent `else` the same as `if`:
-
-```elm
--- Instead do this --
-if isOdd number then
-    Odd
-else if isEven number then
-    Even
-else
-    WhoaCrazyNumber
-```
-
-## Updating fields: Put `{ model ` on its own line and indent the fields being updated
-
-Instead of this:
-
-```elm
-UpdateInviteCode str ->
-    { model | inviteCode = str }
-
-ReenterInviteCode ->
-    { model | inviteCode = ""
-    , formStep = WaitingForInviteCode
-    }
-```
-
-Do this:
-
-```elm
-UpdateInviteCode str ->
-    { model
-         | inviteCode = str
-    }
-
-ReenterInviteCode ->
-    { model
-         | inviteCode = ""
-         , formStep = WaitingForInviteCode
-    }
-```
+This has [several benefits](https://github.com/avh4/elm-format#elm-format),
+not the least of which is that it renders many potential style discussions moot,
+making it easier to spend more time building things!
 
 ## Use descriptive names instead of apostrophes
 
@@ -66,11 +13,11 @@ Instead of this:
 ```elm
 -- Don't do this --
 markDirty model =
-    let
-        model' =
-            { model | dirty = True }
-    in
-        model'
+  let
+    model' =
+      { model | dirty = True }
+  in
+    model'
 ```
 
 ...just come up with a name.
@@ -78,11 +25,11 @@ markDirty model =
 ```elm
 -- Instead do this --
 markDirty model =
-    let
-        dirtyModel =
-            { model | dirty = True }
-    in
-        dirtyModel
+  let
+    dirtyModel =
+      { model | dirty = True }
+  in
+    dirtyModel
 ```
 
 ## Use [`flip`](http://package.elm-lang.org/packages/elm-lang/core/2.1.0/Basics#flip) and/or pipes over backticks
@@ -92,7 +39,7 @@ Instead of this:
 ```elm
 -- Don't do this --
 saveAccounts (List.map deactivateAccount accounts)
-    `andThen` (\response -> sendToLogger response.successMessage)
+  `andThen` (\response -> sendToLogger response.successMessage)
 ```
 
 ...use [`|>`](http://package.elm-lang.org/packages/elm-lang/core/2.1.0/Basics#|>) and qualified names like normal, and use `flip` to obtain the desired argument order.
@@ -100,9 +47,9 @@ saveAccounts (List.map deactivateAccount accounts)
 ```elm
 -- Instead do this --
 accounts
-    |> List.map deactivateAccount
-    |> saveAccounts 
-    |> (flip Task.andThen) (\response -> sendToLogger response.successMessage)
+  |> List.map deactivateAccount
+  |> saveAccounts
+  |> (flip Task.andThen) (\response -> sendToLogger response.successMessage)
 ```
 
 ## Use [`\_ ->`](http://elm-lang.org/docs/syntax#functions) over [`always`](http://package.elm-lang.org/packages/elm-lang/core/2.1.0/Basics#always)
@@ -140,16 +87,16 @@ However this would be awkward:
 ```elm
 -- Don't do this --
 customDecoder string
-    (\str ->
-        case str of
-            "one" ->
-                Result.Ok 1
+  (\str ->
+    case str of
+      "one" ->
+        Result.Ok 1
 
-            "two" ->
-                Result.Ok 2
+      "two" ->
+        Result.Ok 2
 
-            "three" ->
-                Result.Ok 3
+      "three" ->
+        Result.Ok 3
     )
 ```
 
@@ -158,19 +105,19 @@ customDecoder string
 ```elm
 -- Instead do this --
 customDecoder string
-    <| \str ->
-        case str of
-            "one" ->
-                Result.Ok 1
+  <| \str ->
+      case str of
+        "one" ->
+          Result.Ok 1
 
-            "two" ->
-                Result.Ok 2
+        "two" ->
+          Result.Ok 2
 
-            "three" ->
-                Result.Ok 3
+        "three" ->
+          Result.Ok 3
 ```
 
-## Always use [`|:`](https://github.com/circuithub/elm-json-extra/blob/master/src/Json/Decode/Extra.elm#L90-L113) instead of [`objectN`](http://package.elm-lang.org/packages/elm-lang/core/2.1.0/Json-Decode#object2)
+## Always use [`Json.Decode.Pipeline`](https://github.com/NoRedInk/elm-decode-pipeline) instead of [`objectN`](http://package.elm-lang.org/packages/elm-lang/core/2.1.0/Json-Decode#object2)
 
 Even though this would work...
 
@@ -178,13 +125,13 @@ Even though this would work...
 -- Don't do this --
 algoliaResult : Decoder AlgoliaResult
 algoliaResult =
-    object6 AlgoliaResult
-        ("id" := int)
-        ("name" := string)
-        ("address" := string)
-        ("city" := string)
-        ("state" := string)
-        ("zip" := string)
+  object6 AlgoliaResult
+    ("id" := int)
+    ("name" := string)
+    ("address" := string)
+    ("city" := string)
+    ("state" := string)
+    ("zip" := string)
 ```
 
 ...it's inconsistent with the longer decoders, and must be refactored if we want to add more fields.
@@ -193,22 +140,20 @@ Instead do this from the start:
 
 ```elm
 -- Instead do this --
-import Util.Decoder.Extra exposing ((|:))
+import Json.Decode.Pipeline exposing (required, decode)
 
 algoliaResult : Decoder AlgoliaResult
 algoliaResult =
-    succeed AlgoliaResult
-        |: ("id" := int)
-        |: ("name" := string)
-        |: ("address" := string)
-        |: ("city" := string)
-        |: ("state" := string)
-        |: ("zip" := string)
+  decode AlgoliaResult
+    |> required "id" int
+    |> required "name" string
+    |> required "address" string
+    |> required "city" string
+    |> required "state" string
+    |> required "zip" string
 ```
 
-where `|:` is defined as
+This will also make it easier to add [optional fields](http://package.elm-lang.org/packages/NoRedInk/elm-decode-pipeline/1.0.0/Json-Decode-Pipeline#optional) where necessary.
 
-```elm
-import Json.Decode.Extra
-(|:) = Json.Decode.Extra.apply
-```
+[json2elm](http://json2elm.org/) can generate pipeline-style decoders from
+raw JSON.
