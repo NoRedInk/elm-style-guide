@@ -2,6 +2,8 @@ These are the guidelines we follow when writing [Elm](http://elm-lang.org) code 
 
 ## Use [`elm-format`](https://github.com/avh4/elm-format) on all files
 
+We run the latest version of [`elm-format`](https://github.com/avh4/elm-format) to get uniform syntax formatting on our source code.
+
 This has [several benefits](https://github.com/avh4/elm-format#elm-format),
 not the least of which is that it renders many potential style discussions moot,
 making it easier to spend more time building things!
