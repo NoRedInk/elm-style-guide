@@ -23,7 +23,8 @@ To summarize:
     - Imports nothing but generalized types that are used in the model
 
 - Update.elm
-    - Contains the Action type for the view, and the function. 
+    - Contains the Action type for the view, and the update function. 
+    - Contains `addresses`
     - Imports Model
 
 - View.elm
