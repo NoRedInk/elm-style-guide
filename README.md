@@ -31,9 +31,13 @@ To summarize:
     - Contains the view code
     - Imports Model and Update (for the action types)
 
-A good way of starting your projects is to use [elm-init-scripts](https://github.com/NoRedInk/elm-init-scripts) which will generate these files for you.
 
-## Use [`elm-format`](https://github.com/avh4/elm-format) on all files
+## Tooling
+### A good way of starting your projects is to use [elm-init-scripts](https://github.com/NoRedInk/elm-init-scripts) which will generate these files for you.
+
+### Use [`elm-ops-tooling`](https://github.com/NoRedInk/elm-ops-tooling) to manage your projects. Use `elm_deps_sync` to keep your main elm-package in sync with your test elm-package.
+
+### Use [`elm-format`](https://github.com/avh4/elm-format) on all files
 
 We run the latest version of [`elm-format`](https://github.com/avh4/elm-format) to get uniform syntax formatting on our source code.
 
