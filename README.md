@@ -9,7 +9,13 @@ Our Elm apps generally take this form:
 - Update.elm
 - View.elm
 
-API.js.elm is our entry file. Here, we import everything from the other files and actually connect everything together. We use a custom version of StartApp, that allows us to bootstrap our Elm program with data sent down from the server on load. We also setup the interop with JS in this file. Note the extension - API.js.elm. It has .js as it is the file that gets converted into JS! We run elm-make on this file to generate the component that we can include elsewhere. Inside Model, we contain the actual model for the view state of our program. Sometimes, we include decoders for our model in here. Note that we generally don't include non-view state inside here, preferring to instead generalize things away from the view where possible. For example, we might have a record with a list of assignments in our Model file, but the assignment type itself would be in a general file called Assignment.elm. Update.elm contains our update code. This includes the action types for our view. Inside here most of our business logic lives. Inside View.elm, we define the view for our model and set up calls to any action that we need to.
+API.js.elm is our entry file. Here, we import everything from the other files and actually connect everything together. We use a custom version of `StartApp`, that allows us to bootstrap our Elm program with data sent down from the server on load. We also setup the interop with JS in this file. Note the extension - API.js.elm. It has .js as it is the file that gets converted into JS! We run elm-make on this file to generate the component that we can include elsewhere.
+
+Inside Model, we contain the actual model for the view state of our program. Sometimes, we include decoders for our model in here. Note that we generally don't include non-view state inside here, preferring to instead generalize things away from the view where possible. For example, we might have a record with a list of assignments in our Model file, but the assignment type itself would be in a general file called Assignment.elm.
+
+Update.elm contains our update code. This includes the action types for our view. Inside here most of our business logic lives.
+
+Inside View.elm, we define the view for our model and set up calls to any action that we need to.
 
 To summarize:
 
@@ -31,9 +37,17 @@ To summarize:
     - Contains the view code
     - Imports Model and Update (for the action types)
 
-A good way of starting your projects is to use [elm-init-scripts](https://github.com/NoRedInk/elm-init-scripts) which will generate these files for you.
 
-## Use [`elm-format`](https://github.com/avh4/elm-format) on all files
+## Tooling
+### Use [`elm-init-scripts`](https://github.com/NoRedInk/elm-init-scripts) to start your projects
+
+This will generate all the files mentioned above for you.
+
+### Use [`elm-ops-tooling`](https://github.com/NoRedInk/elm-ops-tooling) to manage your projects
+
+In particular, use `elm_deps_sync` to keep your main elm-package.json in sync with your test elm-package.json.
+
+### Use [`elm-format`](https://github.com/avh4/elm-format) on all files
 
 We run the latest version of [`elm-format`](https://github.com/avh4/elm-format) to get uniform syntax formatting on our source code.
 
