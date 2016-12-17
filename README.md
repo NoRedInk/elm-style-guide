@@ -97,7 +97,27 @@ To summarize:
     - Imports `Model` and `Update` (for the `Msg` types)
 
 
-## Use descriptive names instead of underscores
+## Ports
+
+### All ports should bring things in as `Json.Value`
+
+The single source of runtime errors that we have right now are through ports receiving values they shouldn't. If a `port something : Signal Int` receives a float, it will cause a runtime error. We can prevent this by just wrapping the incoming things as `Json.Value`, and handle the errorful data through a `Decoder` result instead.
+
+### Ports should always have documentation
+
+I don't want to have to go out from our Elm files to find where a port is being used most of the time. Simply adding a line or two explaining what the port triggers, or where the values coming in from a port can help a lot.
+
+
+## Model
+
+### Model shouldn't have _any_ view state within them if they aren't tied to views
+
+For example, an assignment should not have a `openPopout` attribute. Doing so means we can't use that type again in another situation.
+
+
+## Naming
+
+### Use descriptive names instead of tacking on underscores
 
 Instead of this:
 
@@ -123,7 +143,9 @@ markDirty model =
     dirtyModel
 ```
 
-## Use pipes over backticks
+## Function Composition
+
+### Use pipes `|>` over backticks
 
 Instead of this:
 
@@ -143,7 +165,7 @@ accounts
   |> Task.andThen (\response -> sendToLogger response.successMessage)
 ```
 
-## Use [`\_ ->`](http://elm-lang.org/docs/syntax#functions) over [`always`](http://package.elm-lang.org/packages/elm-lang/core/latest/Basics#always)
+### Use anonymous function [`\_ ->`](http://elm-lang.org/docs/syntax#functions) over [`always`](http://package.elm-lang.org/packages/elm-lang/core/latest/Basics#always)
 
 It's more concise, more recognizable as a function, and makes it easier to change your mind later and name the argument.
 
@@ -157,7 +179,7 @@ on "click" Json.value (always (Signal.message address ()))
 on "click" Json.value (\_ -> Signal.message address ())
 ```
 
-## Only use [`<|`](http://package.elm-lang.org/packages/elm-lang/core/latest/Basics#<|) when parens would be awkward
+### Only use backward function application [`<|`](http://package.elm-lang.org/packages/elm-lang/core/latest/Basics#<|) when parens would be awkward
 
 Instead of this:
 
@@ -208,7 +230,7 @@ customDecoder string
           Result.Ok 3
 ```
 
-## Always use [`Json.Decode.Pipeline`](https://github.com/NoRedInk/elm-decode-pipeline) instead of [`mapN`](http://package.elm-lang.org/packages/elm-lang/core/latest/Json-Decode#map2)
+### Always use [`Json.Decode.Pipeline`](https://github.com/NoRedInk/elm-decode-pipeline) instead of [`mapN`](http://package.elm-lang.org/packages/elm-lang/core/latest/Json-Decode#map2)
 
 Even though this would work...
 
@@ -244,28 +266,34 @@ algoliaResult =
     |> required "zip" string
 ```
 
-This will also make it easier to add [optional fields](http://package.elm-lang.org/packages/NoRedInk/elm-decode-pipeline/1.0.0/Json-Decode-Pipeline#optional) where necessary.
+This will also make it easier to add [optional fields](http://package.elm-lang.org/packages/NoRedInk/elm-decode-pipeline/latest/Json-Decode-Pipeline#optional) where necessary.
 
 [json2elm](http://json2elm.org/) can generate pipeline-style decoders from
 raw JSON.
 
-## Best practices
+## Syntax
 
-- All ports should bring things in as Json.Value. The single source of runtime errors that we have right now are through ports receiving values they shouldn't. If a `port something : Signal Int` receives a float, it will cause a runtime error. We can prevent this by just wrapping the incoming things as `Json.Value`, and handle the errorful data through a `Decoder` result instead.
+### Use `case..of` over `if` where possible
 
-- Ports should always have documentation. I don't want to have to go out from our Elm files to find where a port is being used most of the time. Simply adding a line or two explaining what the port triggers, or where the values coming in from a port can help a lot.
+`case..of` is clever as it will generate more efficent JS, and it also allows you to catch unmatched patterns at compile time. It's also cheap to extend this data with something more useful later on, like if you need to add another branch. This saves code diffs.
 
-- Models for things that aren't tied to views shouldn't have _any_ view state within them. For example, an assignment should not have a `openPopout` attribute. Doing so means we can't use that type again in another situation.
 
-- Use `case..of` over `if` where possible. It's clever as it will generate more efficent JS, and it aso allows you to catch unmatched patterns at compile time. It's also cheap to extend this data with something more useful later on, like if you need to add another branch. This saves code diffs.
+## Code Smells
 
-- Keep the update function as small as possible. Smaller functions that don't live in a let binding are more reusable.
+### If a module has a looong list of imports, consider refactoring
 
-- If a function can be pulled outside of a let binding, then do it. Giant let bindings hurt readability and performance. The less nested a function, the less functions are used in generated code.
+Having complicated imports hurts our compile time! I don't know what to say about this other than if you feel that there's something wrong with the top 40 lines of your module because of imports, then it might be time to move things out into another module. Trust your gut.
 
-- Having complicated imports hurts our compile time! I don't know what to say about this other than if you feel that there's something wrong with the top 40 lines of your module because of imports, then it might be time to move things out into another module. Trust your gut.
+### If a function can be pulled outside of a let binding, then do it.
 
-- If your application has too many constructors for your Action type, consider refactoring. Large `case..of` statements hurts compile time. It might be possible that some of your constructors can be combined, for example `type Action = Open | Close` could actually be `type Action = SetOpenState Bool`
+Giant let bindings hurt readability and performance. The less nested a function, the less functions are used in generated code.
+
+The update function is especially prone to get longer and longer: keep it as small as possible. Smaller functions that don't live in a let binding are more reusable.
+
+### If your application has too many constructors for your Msg type, consider refactoring
+
+Large `case..of` statements hurts compile time. It might be possible that some of your constructors can be combined, for example `type Msg = Open | Close` could actually be `type Msg = SetOpenState Bool`
+
 
 ## Tooling
 
