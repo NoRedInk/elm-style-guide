@@ -298,7 +298,7 @@ raw JSON.
 
 Having complicated imports hurts our compile time! I don't know what to say about this other than if you feel that there's something wrong with the top 40 lines of your module because of imports, then it might be time to move things out into another module. Trust your gut.
 
-### If a function can be pulled outside of a let binding, then do it.
+### If a function can be pulled outside of a let binding, then do it
 
 Giant let bindings hurt readability and performance. The less nested a function, the less functions are used in generated code.
 
