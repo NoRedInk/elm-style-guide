@@ -163,7 +163,7 @@ accounts
   |> Task.andThen (\response -> sendToLogger response.successMessage)
 ```
 
-## Use [`\_ ->`](http://elm-lang.org/docs/syntax#functions) over [`always`](http://package.elm-lang.org/packages/elm-lang/core/2.1.0/Basics#always)
+## Use [`\_ ->`](http://elm-lang.org/docs/syntax#functions) over [`always`](http://package.elm-lang.org/packages/elm-lang/core/latest/Basics#always)
 
 It's more concise, more recognizable as a function, and makes it easier to change your mind later and name the argument.
 
@@ -177,7 +177,7 @@ on "click" Json.value (always (Signal.message address ()))
 on "click" Json.value (\_ -> Signal.message address ())
 ```
 
-## Only use [`<|`](http://package.elm-lang.org/packages/elm-lang/core/2.1.0/Basics#<|) when parens would be awkward
+## Only use [`<|`](http://package.elm-lang.org/packages/elm-lang/core/latest/Basics#<|) when parens would be awkward
 
 Instead of this:
 
@@ -228,7 +228,7 @@ customDecoder string
           Result.Ok 3
 ```
 
-## Always use [`Json.Decode.Pipeline`](https://github.com/NoRedInk/elm-decode-pipeline) instead of [`objectN`](http://package.elm-lang.org/packages/elm-lang/core/2.1.0/Json-Decode#object2)
+## Always use [`Json.Decode.Pipeline`](https://github.com/NoRedInk/elm-decode-pipeline) instead of [`mapN`](http://package.elm-lang.org/packages/elm-lang/core/latest/Json-Decode#map2)
 
 Even though this would work...
 
@@ -236,7 +236,7 @@ Even though this would work...
 -- Don't do this --
 algoliaResult : Decoder AlgoliaResult
 algoliaResult =
-  object6 AlgoliaResult
+  map6 AlgoliaResult
     ("id" := int)
     ("name" := string)
     ("address" := string)
