@@ -63,7 +63,7 @@ Something reusable that we might open source, that aren't tied directly to any N
 Make as much of this opensource-ready as possible:
 
 - Must have simple documentation explaining how to use the component. No need to go overboard, but it needs to be there. Imagine you're publishing the package on elm-package! Use `--warn` to get errors for missing documentation.
-- Expose the Model, the Msg constructors, the Address pattern.
+- Expose Model and the Msg constructors.
 - Use `type alias Model a = { a | b : c }` to allow extending of things.
 - Provide an API file as example usage of the module.
 - Follow either the [elm-api-component](https://github.com/NoRedInk/elm-api-components) pattern, or the [elm-html-widgets](https://github.com/NoRedInk/elm-html-widgets) pattern
