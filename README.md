@@ -4,6 +4,20 @@ These are the guidelines we follow when writing [Elm](http://elm-lang.org) code 
 
 Note to NoRedInkers: These conventions have evolved over time, so there will always be some parts of the code base that don't follow everything. This is how we want to write new code, but there's no urgency around changing old code to conform. Feel free to clean up old code if you like, but don't feel obliged.
 
+
+## Table of Contents
+
+* [How to Namespace Modules](#how-to-namespace-modules)
+* [Page Structure](#page-structure)
+* [Ports](#ports)
+* [Model](#model)
+* [Naming](#naming)
+* [Function Composition](#function-composition)
+* [Syntax](#syntax)
+* [Code Smells](#code-smells)
+* [Tooling](#tooling)
+
+
 ## How to Namespace Modules
 
 ### `Nri.`
