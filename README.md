@@ -4,10 +4,9 @@ These are the guidelines we follow when writing [Elm](http://elm-lang.org) code 
 
 Note to NoRedInkers: These conventions have evolved over time, so there will always be some parts of the code base that don't follow everything. This is how we want to write new code, but there's no urgency around changing old code to conform. Feel free to clean up old code if you like, but don't feel obliged.
 
+## How to Namespace Modules
 
-## How to Name Modules
-
-### `Nri`
+### `Nri.`
 `Nri.Button`, `Nri.Emoji`, `Nri.Leaderboard`
 
 A reusable part of the site's look and feel, which could go in the visual style guide. While some parts could be made open source, these are tied directly to NRI stuff.
@@ -21,7 +20,7 @@ When adding a new abstraction to Nri, announce it on slack and seek as much feed
 - `elm-css` colors and fonts should go in [here](https://github.com/NoRedInk/nri-elm-css)
 
 
-### `Data`
+### `Data.`
 `Data.Assignment`, `Data.Course`, `Data.User`
 
 Data (and functions related to that data) shared across multiple pages.
@@ -31,7 +30,7 @@ Data (and functions related to that data) shared across multiple pages.
 - A type that represents a "base" type record definition. A simple example might be a `Student`, which you will then extend in `Page` (see below)
 - Helpers for those data types
 
-### `Page`
+### `Page.`
 `Page.Writing.Rate.Main`, `Page.Writing.Rate.Update`, `Page.Writing.Rate.Model.Decoder`
 
 A page on the site, which has its own URL. These are not reusable, and implemented using a combination of types from `Data` and components from `Nri`.
