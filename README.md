@@ -99,24 +99,6 @@ To summarize:
     - Imports Model and Update (for the action types)
 
 
-## Tooling
-
-### Use [`elm-init-scripts`](https://github.com/NoRedInk/elm-init-scripts) to start your projects
-
-This will generate all the files mentioned above for you.
-
-### Use [`elm-ops-tooling`](https://github.com/NoRedInk/elm-ops-tooling) to manage your projects
-
-In particular, use `elm_deps_sync` to keep your main elm-package.json in sync with your test elm-package.json.
-
-### Use [`elm-format`](https://github.com/avh4/elm-format) on all files
-
-We run the latest version of [`elm-format`](https://github.com/avh4/elm-format) to get uniform syntax formatting on our source code.
-
-This has [several benefits](https://github.com/avh4/elm-format#elm-format),
-not the least of which is that it renders many potential style discussions moot,
-making it easier to spend more time building things!
-
 ## Use descriptive names instead of underscores
 
 Instead of this:
@@ -286,3 +268,21 @@ raw JSON.
 - Having complicated imports hurts our compile time! I don't know what to say about this other than if you feel that there's something wrong with the top 40 lines of your module because of imports, then it might be time to move things out into another module. Trust your gut.
 
 - If your application has too many constructors for your Action type, consider refactoring. Large `case..of` statements hurts compile time. It might be possible that some of your constructors can be combined, for example `type Action = Open | Close` could actually be `type Action = SetOpenState Bool`
+
+## Tooling
+
+### Use [`elm-init-scripts`](https://github.com/NoRedInk/elm-init-scripts) to start your projects
+
+This will generate all the files mentioned above for you.
+
+### Use [`elm-ops-tooling`](https://github.com/NoRedInk/elm-ops-tooling) to manage your projects
+
+In particular, use `elm_deps_sync` to keep your main elm-package.json in sync with your test elm-package.json.
+
+### Use [`elm-format`](https://github.com/avh4/elm-format) on all files
+
+We run the latest version of [`elm-format`](https://github.com/avh4/elm-format) to get uniform syntax formatting on our source code.
+
+This has [several benefits](https://github.com/avh4/elm-format#elm-format),
+not the least of which is that it renders many potential style discussions moot,
+making it easier to spend more time building things!
