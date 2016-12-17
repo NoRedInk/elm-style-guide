@@ -143,7 +143,7 @@ markDirty model =
     dirtyModel
 ```
 
-## Use [`flip`](http://package.elm-lang.org/packages/elm-lang/core/2.1.0/Basics#flip) and/or pipes over backticks
+## Use pipes over backticks
 
 Instead of this:
 
@@ -153,14 +153,14 @@ saveAccounts (List.map deactivateAccount accounts)
   `andThen` (\response -> sendToLogger response.successMessage)
 ```
 
-...use [`|>`](http://package.elm-lang.org/packages/elm-lang/core/2.1.0/Basics#|>) and qualified names like normal, and use `flip` to obtain the desired argument order.
+...use [`|>`](http://package.elm-lang.org/packages/elm-lang/core/latest/Basics#|>) and qualified names like normal, and use [`flip`](http://package.elm-lang.org/packages/elm-lang/core/latest/Basics#flip) to obtain the desired argument order.
 
 ```elm
 -- Instead do this --
 accounts
   |> List.map deactivateAccount
   |> saveAccounts
-  |> (flip Task.andThen) (\response -> sendToLogger response.successMessage)
+  |> Task.andThen (\response -> sendToLogger response.successMessage)
 ```
 
 ## Use [`\_ ->`](http://elm-lang.org/docs/syntax#functions) over [`always`](http://package.elm-lang.org/packages/elm-lang/core/2.1.0/Basics#always)
