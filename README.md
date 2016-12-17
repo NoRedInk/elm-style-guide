@@ -253,12 +253,12 @@ Even though this would work...
 algoliaResult : Decoder AlgoliaResult
 algoliaResult =
   map6 AlgoliaResult
-    ("id" := int)
-    ("name" := string)
-    ("address" := string)
-    ("city" := string)
-    ("state" := string)
-    ("zip" := string)
+    (field "id" int)
+    (field "name" string)
+    (field "address" string)
+    (field "city" string)
+    (field "state" string)
+    (field "zip" string)
 ```
 
 ...it's inconsistent with the longer decoders, and must be refactored if we want to add more fields.
