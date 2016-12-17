@@ -5,47 +5,54 @@ These are the guidelines we follow when writing [Elm](http://elm-lang.org) code 
 Note to NoRedInkers: These conventions have evolved over time, so there will always be some parts of the code base that don't follow everything. This is how we want to write new code, but there's no urgency around changing old code to conform. Feel free to clean up old code if you like, but don't feel obliged.
 
 
-## Internal namespacing
+## How to Name Modules
 
-### Namespace Component
-- `Component`
-- Reusable things, could be made open source, that aren't tied directly to any NRI stuff
-- make as much of this open source as possible
-- Must have simple documentation explaining how to use the component. No need to go overboard, but it needs to be there. Imagine you're publishing the package on elm-package! Use `--warn` to get errors for missing documentation
-- Expose the Model, the Action constructors, the Address pattern.
-- Use `type alias Model a = { a | b : c }` and `type alias Addresses a = { a | b : c }` to allow extending of things
-- Provide an API file as example usage of the component
+### `Nri`
+`Nri.Button`, `Nri.Emoji`, `Nri.PremiumUpsell`
+- A reusable part of the site's look and feel, which could go in this style guide. While some parts could be made open source, these are tied directly to NRI stuff.
 
-#### Examples
-- Filter component
-- Long polling component
-- tabs component
-- new things going into `Component` should be either following the [elm-api-component](https://github.com/NoRedInk/elm-api-components) pattern, or the [elm-html-widgets](https://github.com/NoRedInk/elm-html-widgets) pattern
-
-
-### Namespace Nri
-- `Nri`
-- Reusable things, some parts could be made open source, but are tied directly to NRI stuff
-- Like component but internal.
-- Abstractions of data types could go in here.
 - When adding a new abstraction to Nri, announce it on slack and seek as much feedback as possible! this will be used in multiple places.
 
 #### Examples
-- Data types for a concept shared between multiple views (e.g `StudentTask`)
-- helpers for those data types
 - NRI styling (elm-css colors)
-- `Nri.StudentTask`, `Nri.Stylers`
-- A type that represents a "base" type record definition. A simple example might be a student, which you will then extend in `Page` (see below)
+- `Nri.Stylers`
 
 
-### Namespace Page
-- `Page`
-- Pages, not reusable, implemented using a combination of types from `Nri` and components from `Component`
+### `Data`
+`Data.Assignment`, `Data.Course`, `Data.User`
+
+- Data (and functions related to that data) shared across multiple pages.
+
+#### Examples
+- Data types for a concept shared between multiple views (e.g `Data.StudentTask`)
+- Helpers for those data types
+- A type that represents a "base" type record definition. A simple example might be a `Student`, which you will then extend in `Page` (see below)
+
+### `Page`
+`Page.Writing.Rate.Main`, `Page.Writing.Rate.Update`, `Page.Writing.Rate.Model.Decoder`
+- A page on the site, which has its own URL. These are not reusable, and implemented using a combination of types from `Data` and components from `Nri`.
 - Comments for usage instructions aren't required, as code isn't intended to be reusable.
 
 #### Examples
 - Entry points for our particular pages.
-- non-reusable stuff live here
+
+
+### Top-level modules
+`Accordion`, `Dropdown`
+
+- Something reusable that we might open source, that aren't tied directly to any NRI stuff. Name it what we'd name it if we'd already open-sourced it.
+- Make as much of this open source as possible
+- Must have simple documentation explaining how to use the component. No need to go overboard, but it needs to be there. Imagine you're publishing the package on elm-package! Use `--warn` to get errors for missing documentation
+- Expose the Model, the Action constructors, the Address pattern.
+- Use `type alias Model a = { a | b : c }` and `type alias Addresses a = { a | b : c }` to allow extending of things
+- Provide an API file as example usage of the module
+
+#### Examples
+- Filter component
+- Long polling component
+- Tabs component
+- New things going into the top level namespace should be either following the [elm-api-component](https://github.com/NoRedInk/elm-api-components) pattern, or the [elm-html-widgets](https://github.com/NoRedInk/elm-html-widgets) pattern
+
 
 ## Structure
 
