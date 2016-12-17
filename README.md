@@ -1,4 +1,51 @@
+# Elm Style Guide
+
 These are the guidelines we follow when writing [Elm](http://elm-lang.org) code at [NoRedInk](https://www.noredink.com/jobs).
+
+Note to NoRedInkers: These conventions have evolved over time, so there will always be some parts of the code base that don't follow everything. This is how we want to write new code, but there's no urgency around changing old code to conform. Feel free to clean up old code if you like, but don't feel obliged.
+
+
+## Internal namespacing
+
+### Namespace Component
+- `Component`
+- Reusable things, could be made open source, that aren't tied directly to any NRI stuff
+- make as much of this open source as possible
+- Must have simple documentation explaining how to use the component. No need to go overboard, but it needs to be there. Imagine you're publishing the package on elm-package! Use `--warn` to get errors for missing documentation
+- Expose the Model, the Action constructors, the Address pattern.
+- Use `type alias Model a = { a | b : c }` and `type alias Addresses a = { a | b : c }` to allow extending of things
+- Provide an API file as example usage of the component
+
+#### Examples
+- Filter component
+- Long polling component
+- tabs component
+- new things going into `Component` should be either following the [elm-api-component](https://github.com/NoRedInk/elm-api-components) pattern, or the [elm-html-widgets](https://github.com/NoRedInk/elm-html-widgets) pattern
+
+
+### Namespace Nri
+- `Nri`
+- Reusable things, some parts could be made open source, but are tied directly to NRI stuff
+- Like component but internal.
+- Abstractions of data types could go in here.
+- When adding a new abstraction to Nri, announce it on slack and seek as much feedback as possible! this will be used in multiple places.
+
+#### Examples
+- Data types for a concept shared between multiple views (e.g `StudentTask`)
+- helpers for those data types
+- NRI styling (elm-css colors)
+- `Nri.StudentTask`, `Nri.Stylers`
+- A type that represents a "base" type record definition. A simple example might be a student, which you will then extend in `Page` (see below)
+
+
+### Namespace Page
+- `Page`
+- Pages, not reusable, implemented using a combination of types from `Nri` and components from `Component`
+- Comments for usage instructions aren't required, as code isn't intended to be reusable.
+
+#### Examples
+- Entry points for our particular pages.
+- non-reusable stuff live here
 
 ## Structure
 
@@ -25,11 +72,11 @@ To summarize:
     - Imports Model, Update and View.
 
 - Model.elm
-    - Contains the Model type for the view alone. 
+    - Contains the Model type for the view alone.
     - Imports nothing but generalized types that are used in the model
 
 - Update.elm
-    - Contains the Action type for the view, and the update function. 
+    - Contains the Action type for the view, and the update function.
     - Contains `addresses`
     - Imports Model
 
@@ -39,6 +86,7 @@ To summarize:
 
 
 ## Tooling
+
 ### Use [`elm-init-scripts`](https://github.com/NoRedInk/elm-init-scripts) to start your projects
 
 This will generate all the files mentioned above for you.
@@ -206,3 +254,21 @@ This will also make it easier to add [optional fields](http://package.elm-lang.o
 
 [json2elm](http://json2elm.org/) can generate pipeline-style decoders from
 raw JSON.
+
+## Best practices
+
+- All ports should bring things in as Json.Value. The single source of runtime errors that we have right now are through ports receiving values they shouldn't. If a `port something : Signal Int` receives a float, it will cause a runtime error. We can prevent this by just wrapping the incoming things as `Json.Value`, and handle the errorful data through a `Decoder` result instead.
+
+- Ports should always have documentation. I don't want to have to go out from our Elm files to find where a port is being used most of the time. Simply adding a line or two explaining what the port triggers, or where the values coming in from a port can help a lot.
+
+- Models for things that aren't tied to views shouldn't have _any_ view state within them. For example, an assignment should not have a `openPopout` attribute. Doing so means we can't use that type again in another situation.
+
+- Use `case..of` over `if` where possible. It's clever as it will generate more efficent JS, and it aso allows you to catch unmatched patterns at compile time. It's also cheap to extend this data with something more useful later on, like if you need to add another branch. This saves code diffs.
+
+- Keep the update function as small as possible. Smaller functions that don't live in a let binding are more reusable.
+
+- If a function can be pulled outside of a let binding, then do it. Giant let bindings hurt readability and performance. The less nested a function, the less functions are used in generated code.
+
+- Having complicated imports hurts our compile time! I don't know what to say about this other than if you feel that there's something wrong with the top 40 lines of your module because of imports, then it might be time to move things out into another module. Trust your gut.
+
+- If your application has too many constructors for your Action type, consider refactoring. Large `case..of` statements hurts compile time. It might be possible that some of your constructors can be combined, for example `type Action = Open | Close` could actually be `type Action = SetOpenState Bool`
