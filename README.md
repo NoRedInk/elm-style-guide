@@ -117,7 +117,7 @@ This has [several benefits](https://github.com/avh4/elm-format#elm-format),
 not the least of which is that it renders many potential style discussions moot,
 making it easier to spend more time building things!
 
-## Use descriptive names instead of apostrophes
+## Use descriptive names instead of underscores
 
 Instead of this:
 
@@ -125,10 +125,10 @@ Instead of this:
 -- Don't do this --
 markDirty model =
   let
-    model' =
+    model_ =
       { model | dirty = True }
   in
-    model'
+    model_
 ```
 
 ...just come up with a name.
