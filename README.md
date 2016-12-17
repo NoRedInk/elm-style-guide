@@ -313,7 +313,7 @@ Large `case..of` statements hurts compile time. It might be possible that some o
 
 ### Use [`elm-init-scripts`](https://github.com/NoRedInk/elm-init-scripts) to start your projects
 
-This will generate all the files mentioned above for you.
+This will generate all the files mentioned [above](#how-to-structure-modules-for-a-page) for you.
 
 ### Use [`elm-ops-tooling`](https://github.com/NoRedInk/elm-ops-tooling) to manage your projects
 
