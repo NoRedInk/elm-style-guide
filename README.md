@@ -8,7 +8,7 @@ Note to NoRedInkers: These conventions have evolved over time, so there will alw
 ## Table of Contents
 
 * [How to Namespace Modules](#how-to-namespace-modules)
-* [Page Structure](#page-structure)
+* [How to Structure Modules for A Page](#how-to-structure-modules-for-a-page)
 * [Ports](#ports)
 * [Model](#model)
 * [Naming](#naming)
@@ -74,7 +74,7 @@ Make as much of this opensource-ready as possible:
 - Tabs component
 
 
-## Page Structure
+## How to Structure Modules for A Page
 
 Our Elm apps generally take this form:
 
