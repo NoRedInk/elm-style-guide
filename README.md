@@ -93,36 +93,41 @@ Inside **`Model.elm`**, we contain the actual model for the view state of our pr
 
 Inside **`View.elm`**, we define the view for our model and set up any event handlers we need.
 
-**`Flags.elm`** contains a decoder for the flags of the app. We aim to keep our decoders basic and so decode into a special `Flags` type that mirrors the structure of the flags JSON instead of the structure of the `Model` type. The `Flags` and `Model` modules should not depend on each other.
+**`Flags.elm`** contains a decoder for the flags of the app. We aim to keep our decoders basic and so decode into a special `Flags` type that mirrors the structure of the raw JSON instead of the structure of the `Model` type. The `Flags` and `Model` modules should not depend on each other.
 
-**`Init.elm`** contains an init function responsible for turning a `Flags` type into a `Model` type.
+**`Init.elm`** exports an `init` function responsible for running the decoder in `Flags` and turning the resuling `Flags` into a `Model` type. This means `init` should have type.
 
 To summarize:
 
 - Main.elm
     - Our entry point. Contains an initial model, `Html.programWithFlags` calls and ports.
     - Compile target for `elm-make`
-    - Imports `Init`, `Update` and `View`.
+    - Imports `Model`, `Init`, `Update` and `View`.
 
 - Model.elm
     - Contains the `Model` type for the view alone.
     - Imports nothing but generalized types that are used in the model
+    - Exports `Model`
 
 - Update.elm
     - Contains the `Msg` type for the view, and the update function.
     - Imports `Model`
+    - Exports `update : Msg -> Model -> (Model, List (Cmd Msg))` and `Msg`
 
 - View.elm
     - Contains the view code
     - Imports `Model` and `Update` (for the `Msg` types)
+    - Exports `view : Model -> Html Msg`
 
 - Flags.elm
     - Contains the flags decoder
     - Imports nothing but generalized decoders.
+    - Exports `Flags`
 
 - Init.elm
     - Contains the init function.
     - Imports `Flags` and `Model`
+    - Exports `init : String -> (Model, List (Cmd Msg))`
 
 ![Dependency Graph](./images/module-dependencies.png)
 
