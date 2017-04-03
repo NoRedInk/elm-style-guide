@@ -83,9 +83,9 @@ Our Elm apps generally take this form:
 - Update.elm
 - View.elm
 - Flags.elm
-- Init.elm
 
-**`Main.elm`** is our entry file. Here, we import everything from the other files and actually connect everything together. We also setup ports for interop with JS in this file. We run elm-make on this file to generate a JS file that we can include elsewhere.
+**`Main.elm`** is our entry file. Here, we import everything from the other files and actually connect everything together. It is responsible for decoding flags and turning the result into a model. We also setup ports for interop with JS in this file. We run elm-make on this file to generate a JS file that we can include elsewhere.
+
 
 Inside **`Model.elm`**, we contain the actual model for the view state of our program. Note that we generally don't include non-view state inside here, preferring to instead generalize things away from the view where possible. For example, we might have a record with a list of assignments in our `Model` file, but the assignment type itself would be in a module called `Data.Assignment`.
 
@@ -95,14 +95,12 @@ Inside **`View.elm`**, we define the view for our model and set up any event han
 
 **`Flags.elm`** contains a decoder for the flags of the app. We aim to keep our decoders basic and so decode into a special `Flags` type that mirrors the structure of the raw JSON instead of the structure of the `Model` type. The `Flags` and `Model` modules should not depend on each other.
 
-**`Init.elm`** exports an `init` function responsible for running the decoder in `Flags` and turning the resuling `Flags` into a `Model` type. This means `init` should have type.
-
 To summarize:
 
 - Main.elm
-    - Our entry point. Contains an initial model, `Html.programWithFlags` calls and ports.
+    - Our entry point. Decodes the flags, creates the initial model, calls `Html.programWithFlags` and sets up ports.
     - Compile target for `elm-make`
-    - Imports `Model`, `Init`, `Update` and `View`.
+    - Imports `Model`, `Update`, `View` and `Flags`.
 
 - Model.elm
     - Contains the `Model` type for the view alone.
@@ -123,11 +121,6 @@ To summarize:
     - Contains the flags decoder
     - Imports nothing but generalized decoders.
     - Exports `Flags`
-
-- Init.elm
-    - Contains the init function.
-    - Imports `Flags` and `Model`
-    - Exports `init : String -> (Model, List (Cmd Msg))`
 
 ![Dependency Graph](./images/module-dependencies.png)
 
