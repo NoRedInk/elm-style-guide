@@ -1,0 +1,8 @@
+digraph {
+  Update -> Main
+  View -> Main
+  Model -> Main
+  Model -> Update
+  Model -> View
+  Flags -> Main
+}
