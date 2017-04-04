@@ -120,7 +120,7 @@ To summarize:
 - Flags.elm
     - Contains the flags decoder
     - Imports nothing but generalized decoders.
-    - Exports `Flags`
+    - Exports `Flags`, `decodeFlags : String -> Result String Flags`
 
 ![Dependency Graph](./images/module-dependencies.png)
 
