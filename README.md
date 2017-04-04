@@ -96,7 +96,7 @@ Inside **`View.elm`**, we define the view for our model and set up any event han
 
 It calls `Html.programWithFlags` with:
 - `init`, defined in `Main`, runs `Flags.decodeFlags` and turns the resulting `Flags` type into a `Model`.
-- `update` is `Update.update >> Util.batchUpdate`. That last part collapses the `List (Cmd Msg)` into a single `Cmd Msg`.
+- `update` is `Update.update >> batchUpdate`. See [NoRedInk/rocket-update](https://github.com/NoRedInk/rocket-update) for details on `batchUpdate`.
 - `view` is simply `View.view`.
 - `subscriptions`, defined in `Main`, contains any subscriptions this app relies on.
 
