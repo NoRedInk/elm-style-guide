@@ -82,34 +82,54 @@ Our Elm apps generally take this form:
 - Model.elm
 - Update.elm
 - View.elm
+- Flags.elm
 
-**`Main.elm`** is our entry file. Here, we import everything from the other files and actually connect everything together. We also setup ports for interop with JS in this file. We run elm-make on this file to generate a JS file that we can include elsewhere.
-
-Inside **`Model.elm`**, we contain the actual model for the view state of our program. Sometimes, we include decoders for our model in here. Note that we generally don't include non-view state inside here, preferring to instead generalize things away from the view where possible. For example, we might have a record with a list of assignments in our `Model` file, but the assignment type itself would be in a module called `Data.Assignment`.
+Inside **`Model.elm`**, we contain the actual model for the view state of our program. Note that we generally don't include non-view state inside here, preferring to instead generalize things away from the view where possible. For example, we might have a record with a list of assignments in our `Model` file, but the assignment type itself would be in a module called `Data.Assignment`.
 
 **`Update.elm`** contains our update code. This includes the `Msg` types for our view. Inside here most of our business logic lives.
 
 Inside **`View.elm`**, we define the view for our model and set up any event handlers we need.
 
+**`Flags.elm`** contains a decoder for the flags of the app. We aim to keep our decoders basic and so decode into a special `Flags` type that mirrors the structure of the raw JSON instead of the structure of the `Model` type. The `Flags` and `Model` modules should not depend on each other.
+
+**`Main.elm`** is our entry file. Here, we import everything from the other files and actually connect everything together.
+
+It calls `Html.programWithFlags` with:
+- `init`, defined in `Main`, runs `Flags.decodeFlags` and turns the resulting `Flags` type into a `Model`.
+- `update` is `Update.update >> batchUpdate`. See [NoRedInk/rocket-update](https://github.com/NoRedInk/rocket-update) for details on `batchUpdate`.
+- `view` is simply `View.view`.
+- `subscriptions`, defined in `Main`, contains any subscriptions this app relies on.
+
+Additionally we setup ports for interop with JS in this file. We run elm-make on this file to generate a JS file that we can include elsewhere.
+
 To summarize:
 
 - Main.elm
-    - Our entry point. Contains an initial model, `Html.programWithFlags` calls and ports.
+    - Our entry point. Decodes the flags, creates the initial model, calls `Html.programWithFlags` and sets up ports.
     - Compile target for `elm-make`
-    - Imports `Model`, `Update` and `View`.
+    - Imports `Model`, `Update`, `View` and `Flags`.
 
 - Model.elm
     - Contains the `Model` type for the view alone.
     - Imports nothing but generalized types that are used in the model
+    - Exports `Model`
 
 - Update.elm
     - Contains the `Msg` type for the view, and the update function.
     - Imports `Model`
+    - Exports `update : Msg -> Model -> (Model, List (Cmd Msg))` and `Msg`
 
 - View.elm
     - Contains the view code
     - Imports `Model` and `Update` (for the `Msg` types)
+    - Exports `view : Model -> Html Msg`
 
+- Flags.elm
+    - Contains the flags decoder
+    - Imports nothing but generalized decoders.
+    - Exports `Flags`, `decodeFlags : String -> Result String Flags`
+
+![Dependency Graph](./images/module-dependencies.png)
 
 ## Ports
 
