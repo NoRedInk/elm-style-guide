@@ -54,7 +54,7 @@ The module name should follow the URL. Naming after the URL is subject to [How t
 Comments for usage instructions aren't required, as code isn't intended to be reusable.
 
 #### Examples
-- `Page.Learn.Quiz.MultiHighlighter.Main` corresponds to the URL `/learn/quiz/:id`. In particular, the `Learn.Quiz` part corresponds to the `/learn/quiz` part. The `MultiHIghlighter.Main` part is subject to [How to Structure Modules for A Page](#how-to-structure-modules-for-a-page).
+- `Page.Learn.Quiz.MultiHighlighter.Main` corresponds to the URL `/learn/quiz/:id`. In particular, the `Learn.Quiz` part corresponds to the `/learn/quiz` part. The `MultiHighlighter.Main` part is subject to [How to Structure Modules for A Page](#how-to-structure-modules-for-a-page).
 - `Page.Admin.RelevantTerms.Main` corresponds to the URL `/admin/relevant_terms`. In particular, the `Admin.RelevantTerms` part corresponds to the `/admin/relevant_terms` part. The `Main` part is subject to [How to Structure Modules for A Page](#how-to-structure-modules-for-a-page).
 
 #### Non-examples
