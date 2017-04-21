@@ -49,10 +49,17 @@ Data (and functions related to that data) shared across multiple pages.
 
 A page on the site, which has its own URL. These are not reusable, and implemented using a combination of types from `Data` and components from `Nri`.
 
+The module name should follow the URL. Naming after the URL is subject to [How to Structure Modules for A Page](#how-to-structure-modules-for-a-page). The purpose of this convention is so whn you have a url, you can easily figure out where to find the module.
+
 Comments for usage instructions aren't required, as code isn't intended to be reusable.
 
 #### Examples
-- Entry points for our particular pages.
+- `Page.Learn.Quiz.MultiHighlighter.Main` corresponds to the URL `/learn/quiz/:id`. In particular, the `Learn.Quiz` part corresponds to the `/learn/quiz` part. The `MultiHighlighter.Main` part is subject to [How to Structure Modules for A Page](#how-to-structure-modules-for-a-page).
+- `Page.Admin.RelevantTerms.Main` corresponds to the URL `/admin/relevant_terms`. In particular, the `Admin.RelevantTerms` part corresponds to the `/admin/relevant_terms` part. The `Main` part is subject to [How to Structure Modules for A Page](#how-to-structure-modules-for-a-page).
+
+#### Non-examples
+- `Page.Teach.WritingCycles.Rate.Main` corresponds to no URL, so finding it from the URL will be hard.
+- `Page.Mastery.Main` corresponds to no URL, so finding it from the URL will be hard.
 
 
 ### Top-level modules
