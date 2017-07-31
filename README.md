@@ -85,7 +85,7 @@ Make as much of this opensource-ready as possible:
 
 Our Elm apps generally take this form:
 
-- Main.elm (API.js.elm for pages in 0.16)
+- Main.elm
 - Model.elm
 - Update.elm
 - View.elm
