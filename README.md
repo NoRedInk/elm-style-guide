@@ -8,6 +8,7 @@ Note to NoRedInkers: These conventions have evolved over time, so there will alw
 ## Table of Contents
 
 * [How to Namespace Modules](#how-to-namespace-modules)
+* [How to Structure Modules for A Component](#how-to-structure-modules-for-a-component)
 * [How to Structure Modules for A Page](#how-to-structure-modules-for-a-page)
 * [Ports](#ports)
 * [Model](#model)
@@ -26,6 +27,8 @@ Note to NoRedInkers: These conventions have evolved over time, so there will alw
 A reusable part of the site's look and feel, which could go in the visual style guide. While some parts could be made open source, these are tied directly to NRI stuff.
 
 When adding a new abstraction to Nri, announce it on slack and seek as much feedback as possible! this will be used in multiple places.
+
+Further breakdown of the module is subject to [How to Structure Modules for A Component](#how-to-structure-modules-for-a-component).
 
 #### Examples
 - Common navigation header with configurable buttons
@@ -80,6 +83,26 @@ Make as much of this opensource-ready as possible:
 - Long polling component
 - Tabs component
 
+
+## How to Structure Modules for A Component
+
+We use "component" here in its loosest sense: ranging from a reusable view function to a pluggable trio of model/view/update functions.
+
+When the component is small enough, it's fine to let a single module hold all relevant code:
+
+- Nri/
+  - Button.elm
+
+When the component gets more complex, break out each of the Elm architecture triad into its own file:
+
+- Nri/
+  - Leaderboard.elm -- Expose Model, init, view, update, and other types/functions necessary for use
+  - Leaderboard/
+    - Model.elm
+    - Update.elm
+    - View.elm
+
+Introduce `Flags.elm` (see below) and further subcomponents as necessary.
 
 ## How to Structure Modules for A Page
 
