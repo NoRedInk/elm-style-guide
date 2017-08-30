@@ -102,6 +102,11 @@ When the module gets more complex, break out each of the Elm architecture triad 
 
 Introduce `Flags.elm` (see below) and other submodules as necessary.
 
+### Anti-pattern
+
+Don't do: `Nri/Leaderboard/Main.elm` - the filename `Main.elm` is reserved for entrypoints under the `Page` namespace, so that we can run an automatic check during CI, which enforces the [stricter naming convention for modules under `Page`](./#examples-2).
+
+
 ## How to Structure Modules for A Page
 
 Our Elm apps generally take this form:
