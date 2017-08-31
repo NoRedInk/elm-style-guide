@@ -8,6 +8,7 @@ Note to NoRedInkers: These conventions have evolved over time, so there will alw
 ## Table of Contents
 
 * [How to Namespace Modules](#how-to-namespace-modules)
+* [How to Structure Modules for Reuse](#how-to-structure-modules-for-reuse)
 * [How to Structure Modules for A Page](#how-to-structure-modules-for-a-page)
 * [Ports](#ports)
 * [Model](#model)
@@ -26,6 +27,8 @@ Note to NoRedInkers: These conventions have evolved over time, so there will alw
 A reusable part of the site's look and feel, which could go in the visual style guide. While some parts could be made open source, these are tied directly to NRI stuff.
 
 When adding a new abstraction to Nri, announce it on slack and seek as much feedback as possible! this will be used in multiple places.
+
+Further breakdown of the module is subject to [How to Structure Modules for Reuse](#how-to-structure-modules-for-reuse).
 
 #### Examples
 - Common navigation header with configurable buttons
@@ -47,7 +50,7 @@ Data (and functions related to that data) shared across multiple pages.
 ### `Page.`
 `Page.Writing.Rate.Main`, `Page.Writing.Rate.Update`, `Page.Writing.Rate.Model.Decoder`
 
-A page on the site, which has its own URL. These are not reusable, and implemented using a combination of types from `Data` and components from `Nri`.
+A page on the site, which has its own URL. These are not reusable, and implemented using a combination of types from `Data` and modules from `Nri`.
 
 The module name should follow the URL. Naming after the URL is subject to [How to Structure Modules for A Page](#how-to-structure-modules-for-a-page). The purpose of this convention is so when you have a URL, you can easily figure out where to find the module.
 
@@ -69,7 +72,7 @@ Something reusable that we might open source, that aren't tied directly to any N
 
 Make as much of this opensource-ready as possible:
 
-- Must have simple documentation explaining how to use the component. No need to go overboard, but it needs to be there. Imagine you're publishing the package on elm-package! Use `--warn` to get errors for missing documentation.
+- Must have simple documentation explaining how to use the module. No need to go overboard, but it needs to be there. Imagine you're publishing the package on elm-package! Use `--warn` to get errors for missing documentation.
 - Expose Model and the Msg constructors.
 - Use `type alias Model a = { a | b : c }` to allow extending of things.
 - Provide an API file as example usage of the module.
@@ -79,6 +82,31 @@ Make as much of this opensource-ready as possible:
 - Filter component
 - Long polling component
 - Tabs component
+
+
+## How to Structure Modules for Reuse
+
+When the module is small enough, it's fine to let a single file hold all relevant code:
+
+- Nri/
+  - Button.elm
+
+When the module gets more complex, break out each of the Elm architecture triad into its own file while keeping the top-level Elm file as the public interface to import:
+
+- Nri/
+  - Leaderboard.elm -- Expose Model, init, view, update, and other types/functions necessary for use
+  - Leaderboard/
+    - Model.elm
+    - Update.elm
+    - View.elm
+
+Introduce `Flags.elm` (see below) and other submodules as necessary.
+
+We don't have a metric to determine exactly when to move from a single-file module to a multi-file module: trust your gut feelings and aesthetics.
+
+### Anti-pattern
+
+Don't do: `Nri/Leaderboard/Main.elm` - the filename `Main.elm` is reserved for entrypoints under the `Page` namespace, so that we can run an automatic check during CI, which enforces the [stricter naming convention for modules under `Page`](./#examples-2).
 
 
 ## How to Structure Modules for A Page
