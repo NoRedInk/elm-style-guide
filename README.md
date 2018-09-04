@@ -414,6 +414,8 @@ init students =
 
 Notice that because `Sort.Dict.Dict` is an opaque type, your `Model` (and anything which depends upon it) does not depend on `studentIdSorter`. Apart from `Sort.Dict.Dict`, there is also a `Sort.Dict.Set` type.
 
+Code safety in situations where there are multiple types of identifiers (think of a join in SQL terms) increases dramatically with the application of this technique.
+
 ## Code Smells
 
 ### If a module has a looong list of imports, consider refactoring
