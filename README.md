@@ -15,6 +15,7 @@ Note to NoRedInkers: These conventions have evolved over time, so there will alw
 * [Naming](#naming)
 * [Function Composition](#function-composition)
 * [Syntax](#syntax)
+* [Identifiers](#identifiers)
 * [Code Smells](#code-smells)
 * [Tooling](#tooling)
 
@@ -348,6 +349,70 @@ raw JSON.
 
 `case..of` is clever as it will generate more efficent JS, and it also allows you to catch unmatched patterns at compile time. It's also cheap to extend this data with something more useful later on, like if you need to add another branch. This saves code diffs.
 
+## Identifiers
+
+### Prefer the use of union types over simple types for identifiers
+
+Using a type alias for a unique identifier allows for easy mistakes supplying any old string or integer that happens to be in scope, rather than an actual identifier. Prefer using a single case union instead:
+
+```elm
+-- Don't do this --
+type alias Student =
+    { id : StudentId
+    , name : String
+    , age : Int
+    }
+
+
+type alias StudentId =
+    String
+
+getStudentDetails : StudentId -> Student
+getStudentDetails sid =
+    -- Passing a name in here by mistake will compile fine --
+    ...
+```
+
+```elm
+-- Do this instead --
+type alias Student =
+    { id : StudentId
+    , name : String
+    , age : Int
+    }
+
+
+type StudentId
+    = StudentId String
+
+
+getStudentDetails : StudentId -> Student
+getStudentDetails sid =
+    -- The compiler will reject strings --
+    ...
+```
+
+If you need to store these types in some kind of collection (likely), we have chosen to use the collections from [elm-sorter-experiment](https://github.com/rtfeldman/elm-sorter-experiment/). You will need to create a sorter for your identifier - the ordering may or may not be relevant for your use case.
+
+```elm
+import Sort exposing (Sorter)
+import Sort.Dict
+
+studentIdSorter : Sorter StudentId
+studentIdSorter =
+    Sort.by (\(StudentId sid) -> sid) Sort.alphabetical
+
+type alias Model =
+    { students : Sort.Dict.Dict StudentId Student }
+
+init : List Student -> Model
+init students =
+    students
+        |> List.map (\s -> ( s.id, s ))
+        |> Sort.Dict.fromList studentIdSorter
+```
+
+Notice that because `Sort.Dict.Dict` is an opaque type, your `Model` (and anything which depends upon it) does not depend on `studentIdSorter`. Apart from `Sort.Dict.Dict`, there is also a `Sort.Dict.Set` type.
 
 ## Code Smells
 
