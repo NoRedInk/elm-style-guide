@@ -387,6 +387,8 @@ type StudentId
 -- In the other module file --
 module Thing.Student exposing (Student)
 
+import Thing.StudentId exposing (StudentId)
+
 type alias Student =
     { id : StudentId
     , name : String
