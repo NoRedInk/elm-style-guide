@@ -375,16 +375,23 @@ getStudentDetails sid =
 
 ```elm
 -- Do this instead --
+
+-- In one module file --
+module Thing.StudentId exposing (StudentId)
+
+type StudentId
+    = StudentId String
+    
+-- All conversions go in this module --
+
+-- In the other module file --
+module Thing.Student exposing (Student)
+
 type alias Student =
     { id : StudentId
     , name : String
     , age : Int
     }
-
-
-type StudentId
-    = StudentId String
-
 
 getStudentDetails : StudentId -> Student
 getStudentDetails sid =
@@ -392,15 +399,31 @@ getStudentDetails sid =
     ...
 ```
 
-If you need to store these types in some kind of collection (likely), we have chosen to use the collections from [elm-sorter-experiment](https://github.com/rtfeldman/elm-sorter-experiment/). You will need to create a sorter for your identifier - the ordering may or may not be relevant for your use case.
+The ID module should expose an intentionally minimal set of conversion functions:
+
+* We should never expose conversion functions before they're needed. Start with module CustomerId exposing (CustomerId) and expand the API from there only as necessary!
+* We should avoid exposing conversion functions whose types depend on the internals of the custom type. (For example, decoder : Decoder CustomerId is great, but functions like fromInt : Int -> CustomerId make the system brittle to implementation details. Exposing an Int -> CustomerId function should be avoided unless there is a very important production reason to introduce it. If tests need an Int -> CustomerId function, they can easily write one using CustomerId.decoder and Debug.crash, since in tests Debug.crash is as harmless as any other test failure.)
+
+
+To use these types as keys in collections, use  [elm-sorter-experiment](https://github.com/rtfeldman/elm-sorter-experiment/). You will need to create a sorter for your identifier - the ordering may or may not be relevant for your use case.
 
 ```elm
-import Sort exposing (Sorter)
-import Sort.Dict
+-- In the ID module --
+module Thing.StudentId exposing (StudentId, studentIdSorter)
+
+-- Rest of your code... --
 
 studentIdSorter : Sorter StudentId
 studentIdSorter =
     Sort.by (\(StudentId sid) -> sid) Sort.alphabetical
+
+-- In use: --
+module Thing.DoLogic
+
+import Thing.StudentId exposing (StudentId, studentIdSorter)
+import Sort exposing (Sorter)
+import Sort.Dict
+
 
 type alias Model =
     { students : Sort.Dict.Dict StudentId Student }
