@@ -15,6 +15,7 @@ Note to NoRedInkers: These conventions have evolved over time, so there will alw
 * [Naming](#naming)
 * [Function Composition](#function-composition)
 * [Syntax](#syntax)
+* [Identifiers](#identifiers)
 * [Code Smells](#code-smells)
 * [Tooling](#tooling)
 
@@ -348,6 +349,97 @@ raw JSON.
 
 `case..of` is clever as it will generate more efficent JS, and it also allows you to catch unmatched patterns at compile time. It's also cheap to extend this data with something more useful later on, like if you need to add another branch. This saves code diffs.
 
+## Identifiers
+
+### Prefer the use of union types over simple types for identifiers
+
+Using a type alias for a unique identifier allows for easy mistakes supplying any old string or integer that happens to be in scope, rather than an actual identifier. Prefer using a single case union instead:
+
+```elm
+-- Don't do this --
+type alias Student =
+    { id : StudentId
+    , name : String
+    , age : Int
+    }
+
+
+type alias StudentId =
+    String
+
+getStudentDetails : StudentId -> Student
+getStudentDetails sid =
+    -- Passing a name in here by mistake will compile fine --
+    ...
+```
+
+```elm
+-- Do this instead --
+
+-- In one module file --
+module Thing.StudentId exposing (StudentId)
+
+type StudentId
+    = StudentId String
+    
+-- All conversions go in this module --
+
+-- In the other module file --
+module Thing.Student exposing (Student)
+
+import Thing.StudentId exposing (StudentId)
+
+type alias Student =
+    { id : StudentId
+    , name : String
+    , age : Int
+    }
+
+getStudentDetails : StudentId -> Student
+getStudentDetails sid =
+    -- The compiler will reject strings --
+    ...
+```
+
+The ID module should expose an intentionally minimal set of conversion functions:
+
+* We should never expose conversion functions before they're needed. Start with module CustomerId exposing (CustomerId) and expand the API from there only as necessary!
+* We should avoid exposing conversion functions whose types depend on the internals of the custom type. (For example, decoder : Decoder CustomerId is great, but functions like fromInt : Int -> CustomerId make the system brittle to implementation details. Exposing an Int -> CustomerId function should be avoided unless there is a very important production reason to introduce it. If tests need an Int -> CustomerId function, they can easily write one using CustomerId.decoder and Debug.crash, since in tests Debug.crash is as harmless as any other test failure.)
+
+
+To use these types as keys in collections, use  [elm-sorter-experiment](https://github.com/rtfeldman/elm-sorter-experiment/). You will need to create a sorter for your identifier - the ordering may or may not be relevant for your use case.
+
+```elm
+-- In the ID module --
+module Thing.StudentId exposing (StudentId, studentIdSorter)
+
+-- Rest of your code... --
+
+studentIdSorter : Sorter StudentId
+studentIdSorter =
+    Sort.by (\(StudentId sid) -> sid) Sort.alphabetical
+
+-- In use: --
+module Thing.DoLogic
+
+import Thing.StudentId exposing (StudentId, studentIdSorter)
+import Sort exposing (Sorter)
+import Sort.Dict
+
+
+type alias Model =
+    { students : Sort.Dict.Dict StudentId Student }
+
+init : List Student -> Model
+init students =
+    students
+        |> List.map (\s -> ( s.id, s ))
+        |> Sort.Dict.fromList studentIdSorter
+```
+
+Notice that because `Sort.Dict.Dict` is an opaque type, your `Model` (and anything which depends upon it) does not depend on `studentIdSorter`. Apart from `Sort.Dict.Dict`, there is also a `Sort.Dict.Set` type.
+
+Code safety in situations where there are multiple types of identifiers (think of a join in SQL terms) increases dramatically with the application of this technique.
 
 ## Code Smells
 
