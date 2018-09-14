@@ -413,6 +413,7 @@ To use these types as keys in collections, use  [elm-sorter-experiment](https://
 -- In the ID module --
 module Thing.StudentId exposing (StudentId, studentIdSorter)
 
+import Sort exposing (Sorter)
 -- Rest of your code... --
 
 studentIdSorter : Sorter StudentId
@@ -423,7 +424,6 @@ studentIdSorter =
 module Thing.DoLogic
 
 import Thing.StudentId exposing (StudentId, studentIdSorter)
-import Sort exposing (Sorter)
 import Sort.Dict
 
 
