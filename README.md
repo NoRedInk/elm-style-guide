@@ -96,14 +96,10 @@ When the module is small enough, it's fine to let a single file hold all relevan
 
 When the module gets more complex, break out each of the Elm architecture triad into its own file while keeping the top-level Elm file as the public interface to import:
 
-- Nri/
-  - Leaderboard.elm -- Expose Model, init, view, update, and other types/functions necessary for use
-  - Leaderboard/
-    - Model.elm
-    - Update.elm
-    - View.elm
-
-Introduce `Flags.elm` (see below) and other submodules as necessary.
+- `Nri/`
+  - `Leaderboard.elm` -- Expose Model, init, view, update, and other types/functions necessary for use
+  - `Leaderboard/`  (only exists if necessary)
+      - Introduce private submodules as necessary
 
 We don't have a metric to determine exactly when to move from a single-file module to a multi-file module: trust your gut feelings and aesthetics.
 
@@ -117,18 +113,21 @@ Don't do: `Nri/Leaderboard/Main.elm` - the filename `Main.elm` is reserved for e
 Our Elm apps generally take this form:
 
 - Main.elm
-- Model.elm
-- Update.elm
-- View.elm
-- Flags.elm
+    - `type alias Flags = { ...a record that directly corresponds to the JSON page data... }`
+    - `flagsDecoder : Json.Decode.Decoder Flags`
+    - `type alias Model = { ...a record with fields... }`
+    - `init : Flags -> (Model, Cmd Msg)`
+    - `type Msg = ... variants for each possible message ...
+    - `update : Msg -> Model -> (Model, Cmd Msg)`
+    - `view : Model -> Html Msg`
 
-Inside **`Model.elm`**, we contain the actual model for the view state of our program. Note that we generally don't include non-view state inside here, preferring to instead generalize things away from the view where possible. For example, we might have a record with a list of assignments in our `Model` file, but the assignment type itself would be in a module called `Data.Assignment`.
+Inside **`Model`**, we contain the actual model for the view state of our program. Note that we generally don't include non-view state inside here, preferring to instead generalize things away from the view where possible. For example, we might have a record with a list of assignments in our `Model` file, but the assignment type itself would be in a module called `Data.Assignment`.
 
-**`Update.elm`** contains our update code. This includes the `Msg` types for our view. Inside here most of our business logic lives.
+**`Msg`/`update`** contains our update code. Inside here most of our business logic lives.
 
-Inside **`View.elm`**, we define the view for our model and set up any event handlers we need.
+Inside **`view`**, we define the view for our model and set up any event handlers we need.
 
-**`Flags.elm`** contains a decoder for the flags of the app. We aim to keep our decoders basic and so decode into a special `Flags` type that mirrors the structure of the raw JSON instead of the structure of the `Model` type. The `Flags` and `Model` modules should not depend on each other.
+**`Flags/flagsDecoder`** is a decoder for the flags of the app. We aim to keep our decoders basic and so decode into a special `Flags` type that mirrors the structure of the raw JSON instead of the structure of the `Model` type. The `Flags` and `Model` modules should not depend on each other.
 
 **`Main.elm`** is our entry file. Here, we import everything from the other files and actually connect everything together.
 
@@ -142,30 +141,16 @@ Additionally we setup ports for interop with JS in this file. We run elm-make on
 
 To summarize:
 
-- Main.elm
+- `Main.elm`
     - Our entry point. Decodes the flags, creates the initial model, calls `Html.programWithFlags` and sets up ports.
     - Compile target for `elm-make`
-    - Imports `Model`, `Update`, `View` and `Flags`.
+    - Imports the reusable module.
 
-- Model.elm
+- `<ModuleName>`.elm
     - Contains the `Model` type for the view alone.
-    - Imports nothing but generalized types that are used in the model
-    - Exports `Model`
-
-- Update.elm
-    - Contains the `Msg` type for the view, and the update function.
-    - Imports `Model`
-    - Exports `update : Msg -> Model -> (Model, List (Cmd Msg))` and `Msg`
-
-- View.elm
-    - Contains the view code
-    - Imports `Model` and `Update` (for the `Msg` types)
-    - Exports `view : Model -> Html Msg`
-
-- Flags.elm
-    - Contains the flags decoder
-    - Imports nothing but generalized decoders.
-    - Exports `Flags`, `decodeFlags : String -> Result String Flags`
+    - Contains the `Msg` type for the view, and the `update` function.
+    - Contains the `view` code
+    - Contains the `flagsDecoder` and `Flags` type if necessary
 
 ![Dependency Graph](./images/module-dependencies.png)
 
