@@ -123,19 +123,19 @@ Our Elm apps generally take this form:
 
 Inside **`Model`**, we contain the actual model for the view state of our program. Note that we generally don't include non-view state inside here, preferring to instead generalize things away from the view where possible. For example, we might have a record with a list of assignments in our `Model` file, but the assignment type itself would be in a module called `Data.Assignment`.
 
-**`Msg`/`update`** contains our update code. Inside here most of our business logic lives.
+**`Msg`, `update`** contains our update code. Inside here most of our business logic lives.
 
 Inside **`view`**, we define the view for our model and set up any event handlers we need.
 
-**`Flags/flagsDecoder`** is a decoder for the flags of the app. We aim to keep our decoders basic and so decode into a special `Flags` type that mirrors the structure of the raw JSON instead of the structure of the `Model` type. The `Flags` and `Model` modules should not depend on each other.
+**`Flags`, `flagsDecoder`** is a decoder for the flags of the app. We aim to keep our decoders basic and so decode into a special `Flags` type that mirrors the structure of the raw JSON instead of the structure of the `Model` type. The `Flags` and `Model` modules should not depend on each other.
 
 **`Main.elm`** is our entry file. Here, we import everything from the other files and actually connect everything together.
 
 It calls `Html.programWithFlags` with:
-- `init`, defined in `Main`, runs `Flags.decodeFlags` and turns the resulting `Flags` type into a `Model`.
-- `update` is `Update.update >> batchUpdate`. See [NoRedInk/rocket-update](https://github.com/NoRedInk/rocket-update) for details on `batchUpdate`.
-- `view` is simply `View.view`.
-- `subscriptions`, defined in `Main`, contains any subscriptions this app relies on.
+- `init`, runs `flagsDecoder` and turns the resulting `Flags` type into a `Model`.
+- `update`
+- `view`
+- `subscriptions`, defined top-level if there are any subscriptions, or simply an inline `\model -> Sub.none` if the page has no subscriptions.
 
 Additionally we setup ports for interop with JS in this file. We run elm-make on this file to generate a JS file that we can include elsewhere.
 
