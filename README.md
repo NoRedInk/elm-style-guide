@@ -117,7 +117,7 @@ Our Elm apps generally take this form:
     - `flagsDecoder : Json.Decode.Decoder Flags`
     - `type alias Model = { ...a record with fields... }`
     - `init : Flags -> (Model, Cmd Msg)`
-    - `type Msg = ... variants for each possible message ...
+    - `type Msg = ... variants for each possible message ...`
     - `update : Msg -> Model -> (Model, Cmd Msg)`
     - `view : Model -> Html Msg`
 
