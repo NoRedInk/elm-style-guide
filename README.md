@@ -114,7 +114,7 @@ Our Elm apps generally take this form:
 
 - Main.elm
     - `type alias Flags = { ...a record that directly corresponds to the JSON page data... }`
-    - `flagsDecoder : Json.Decode.Decoder Flags`
+    - `decoder : Json.Decode.Decoder Flags`
     - `type alias Model = { ...a record with fields... }`
     - `init : Flags -> (Model, Cmd Msg)`
     - `type Msg = ... variants for each possible message ...`
@@ -127,12 +127,12 @@ Inside **`Model`**, we contain the actual model for the view state of our progra
 
 Inside **`view`**, we define the view for our model and set up any event handlers we need.
 
-**`Flags`, `flagsDecoder`** is a decoder for the flags of the app. We aim to keep our decoders basic and so decode into a special `Flags` type that mirrors the structure of the raw JSON instead of the structure of the `Model` type. The `Flags` and `Model` modules should not depend on each other.
+**`Flags`, `decoder : Decoder Flags`** is a decoder for the flags of the app. We aim to keep our decoders basic and so decode into a special `Flags` type that mirrors the structure of the raw JSON instead of the structure of the `Model` type. The `Flags` and `Model` modules should not depend on each other.
 
 **`Main.elm`** is our entry file. Here, we import everything from the other files and actually connect everything together.
 
 It calls `Html.programWithFlags` with:
-- `init`, runs `flagsDecoder` and turns the resulting `Flags` type into a `Model`.
+- `init`, runs `decoder` and turns the resulting `Flags` type into a `Model`.
 - `update`
 - `view`
 - `subscriptions`, defined top-level if there are any subscriptions, or simply an inline `\model -> Sub.none` if the page has no subscriptions.
@@ -150,7 +150,7 @@ To summarize:
     - Contains the `Model` type for the view alone.
     - Contains the `Msg` type for the view, and the `update` function.
     - Contains the `view` code
-    - Contains the `flagsDecoder` and `Flags` type if necessary
+    - Contains the `decoder : Decoder Flags` and `Flags` type if necessary
 
 ![Dependency Graph](./images/module-dependencies.png)
 
