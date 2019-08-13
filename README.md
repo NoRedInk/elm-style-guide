@@ -202,26 +202,6 @@ markDirty model =
 
 ## Function Composition
 
-### Use pipes `|>` over backticks
-
-Instead of this:
-
-```elm
--- Don't do this --
-saveAccounts (List.map deactivateAccount accounts)
-  `andThen` (\response -> sendToLogger response.successMessage)
-```
-
-...use [`|>`](http://package.elm-lang.org/packages/elm-lang/core/latest/Basics#|>) and qualified names like normal, and use [`flip`](http://package.elm-lang.org/packages/elm-lang/core/latest/Basics#flip) to obtain the desired argument order.
-
-```elm
--- Instead do this --
-accounts
-  |> List.map deactivateAccount
-  |> saveAccounts
-  |> Task.andThen (\response -> sendToLogger response.successMessage)
-```
-
 ### Use anonymous function [`\_ ->`](http://elm-lang.org/docs/syntax#functions) over [`always`](http://package.elm-lang.org/packages/elm-lang/core/latest/Basics#always)
 
 It's more concise, more recognizable as a function, and makes it easier to change your mind later and name the argument.
