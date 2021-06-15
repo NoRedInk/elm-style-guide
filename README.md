@@ -267,7 +267,7 @@ customDecoder string
           Result.Ok 3
 ```
 
-### Always use [`Json.Decode.Pipeline`](https://github.com/NoRedInk/elm-decode-pipeline) instead of [`mapN`](http://package.elm-lang.org/packages/elm-lang/core/latest/Json-Decode#map2)
+### Always use [`Json.Decode.Pipeline`](https://github.com/NoRedInk/elm-json-decode-pipeline) instead of [`mapN`](http://package.elm-lang.org/packages/elm-lang/core/latest/Json-Decode#map2)
 
 Even though this would work...
 
