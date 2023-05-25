@@ -1,442 +1,311 @@
 # Elm Style Guide
 
-These are the guidelines we follow when writing [Elm](http://elm-lang.org) code at [NoRedInk](https://www.noredink.com/jobs).
+_Reviewed last on 2023-05-24_
 
-Note to NoRedInkers: These conventions have evolved over time, so there will always be some parts of the code base that don't follow everything. This is how we want to write new code, but there's no urgency around changing old code to conform. Feel free to clean up old code if you like, but don't feel obliged.
+These are the styles and conventions that NoRedInk engineers use when writing Elm code. We've removed the guidelines that refer to internal scripts, so NoRedInk engineers should refer to the internal version of this document.
 
+## Casing
 
-## Table of Contents
+Be exhaustive whenever possible in a case, in order catch unmatched patterns (and therefore bugs!) at compile time. This is especially important since it’s likely that new patterns will be added over time!
 
-* [How to Namespace Modules](#how-to-namespace-modules)
-* [How to Structure Modules for Reuse](#how-to-structure-modules-for-reuse)
-* [How to Structure Modules for A Page](#how-to-structure-modules-for-a-page)
-* [Ports](#ports)
-* [Model](#model)
-* [Naming](#naming)
-* [Function Composition](#function-composition)
-* [Syntax](#syntax)
-* [Identifiers](#identifiers)
-* [Code Smells](#code-smells)
-* [Tooling](#tooling)
-
-
-## How to Namespace Modules
-
-### `Nri.`
-`Nri.Button`, `Nri.Emoji`, `Nri.Leaderboard`
-
-A reusable part of the site's look and feel, which could go in the visual style guide. While some parts could be made open source, these are tied directly to NRI stuff.
-
-When adding a new abstraction to Nri, announce it on slack and seek as much feedback as possible! this will be used in multiple places.
-
-Further breakdown of the module is subject to [How to Structure Modules for Reuse](#how-to-structure-modules-for-reuse).
-
-#### Examples
-- Common navigation header with configurable buttons
-
-#### Non-examples
-- `elm-css` colors and fonts should go in [here](https://github.com/NoRedInk/nri-elm-css)
-
-
-### `Data.`
-`Data.Assignment`, `Data.Course`, `Data.User`
-
-Data (and functions related to that data) shared across multiple pages.
-
-#### Examples
-- Data types for a concept shared between multiple views (e.g `Data.StudentTask`)
-- A type that represents a "base" type record definition. A simple example might be a `Student`, which you will then extend in `Page` (see below)
-- Helpers for those data types
-
-### `Page.`
-`Page.Writing.Rate.Main`, `Page.Writing.Rate.Update`, `Page.Writing.Rate.Model.Decoder`
-
-A page on the site, which has its own URL. These are not reusable, and implemented using a combination of types from `Data` and modules from `Nri`. Comments for usage instructions aren't required, as code isn't intended to be reusable.
-
-The module name should follow the URL. Naming after the URL is subject to [How to Structure Modules for A Page](#how-to-structure-modules-for-a-page). The purpose of this convention is so when you have a URL, you can easily figure out where to find the module.
-
-If a module ends with `Main`, everything between `Page` and `Main` **MUST** correspond to a URL.
-
-#### Examples
-- `Page.Admin.RelevantTerms.Main` corresponds to the URL `/admin/relevant_terms`.
-- `Page.Learn.ChooseSourceMaterials.Main` corresponds to the URL `/learn/choose_source_materials`.
-- `Page.Preferences.Main` corresponds to the URL `/preferences`.
-- `Page.Teacher.Courses.Assignments.Main` corresponds to the URL `/teach/courses/:id/assignments`.
-    N.B. The `/:id` is dropped from the module name to avoid too much complexity.
-
-#### Non-examples
-- `Page.Mastery.Main` corresponds to no URL. We would expect `/mastery` to exist, but it doesn't. Finding the module from the URL will be hard.
-- `Page.Teach.WritingCycles.Rate.Main` corresponds to no URL. We would expect `/teach/writing_cycles/rate` or `/teach/writing_cycles/:id/rate` to exist, but neither do. Finding the module from the URL will be hard.
-
-### Top-level modules
-`Accordion`, `Dropdown`
-
-Something reusable that we might open source, that aren't tied directly to any NRI stuff. Name it what we'd name it if we'd already open-sourced it.
-
-Make as much of this opensource-ready as possible:
-
-- Must have simple documentation explaining how to use the module. No need to go overboard, but it needs to be there. Imagine you're publishing the package on elm-package! Use `--warn` to get errors for missing documentation.
-- Expose Model and the Msg constructors.
-- Use `type alias Model a = { a | b : c }` to allow extending of things.
-- Provide an API file as example usage of the module.
-- Follow either the [elm-api-component](https://github.com/NoRedInk/elm-api-components) pattern, or the [elm-html-widgets](https://github.com/NoRedInk/elm-html-widgets) pattern
-
-#### Examples
-- Filter component
-- Long polling component
-- Tabs component
-
-
-## How to Structure Modules for Reuse
-
-When the module is small enough, it's fine to let a single file hold all relevant code:
-
-- Nri/
-  - Button.elm
-
-When the module gets more complex, break out each of the Elm architecture triad into its own file while keeping the top-level Elm file as the public interface to import:
-
-- `Nri/`
-  - `Leaderboard.elm` -- Expose Model, init, view, update, and other types/functions necessary for use
-  - `Leaderboard/`  (only exists if necessary)
-      - Introduce private submodules as necessary
-
-We don't have a metric to determine exactly when to move from a single-file module to a multi-file module: trust your gut feelings and aesthetics.
-
-### Anti-pattern
-
-Don't do: `Nri/Leaderboard/Main.elm` - the filename `Main.elm` is reserved for entrypoints under the `Page` namespace, so that we can run an automatic check during CI, which enforces the [stricter naming convention for modules under `Page`](./#examples-2).
-
-
-## How to Structure Modules for A Page
-
-Our Elm apps generally take this form:
-
-- Main.elm
-    - `type alias Flags = { ...a record that directly corresponds to the JSON page data... }`
-    - `decoder : Json.Decode.Decoder Flags`
-    - `type alias Model = { ...a record with fields... }`
-    - `init : Flags -> (Model, Cmd Msg)`
-    - `type Msg = ... variants for each possible message ...`
-    - `update : Msg -> Model -> (Model, Cmd Msg)`
-    - `view : Model -> Html Msg`
-
-Inside **`Model`**, we contain the actual model for the view state of our program. Note that we generally don't include non-view state inside here, preferring to instead generalize things away from the view where possible. For example, we might have a record with a list of assignments in our `Model` file, but the assignment type itself would be in a module called `Data.Assignment`.
-
-**`Msg`, `update`** contains our update code. Inside here most of our business logic lives.
-
-Inside **`view`**, we define the view for our model and set up any event handlers we need.
-
-**`Flags`, `decoder : Decoder Flags`** is a decoder for the flags of the app. We aim to keep our decoders basic and so decode into a special `Flags` type that mirrors the structure of the raw JSON instead of the structure of the `Model` type. The `Flags` and `Model` modules should not depend on each other.
-
-**`Main.elm`** is our entry file. Here, we import everything from the other files and actually connect everything together.
-
-It calls `Html.programWithFlags` with:
-- `init`, runs `decoder` and turns the resulting `Flags` type into a `Model`.
-- `update`
-- `view`
-- `subscriptions`, defined top-level if there are any subscriptions, or simply an inline `\model -> Sub.none` if the page has no subscriptions.
-
-Additionally we setup ports for interop with JS in this file. We run elm-make on this file to generate a JS file that we can include elsewhere.
-
-To summarize:
-
-- `Main.elm`
-    - Our entry point. Decodes the flags, creates the initial model, calls `Html.programWithFlags` and sets up ports.
-    - Compile target for `elm-make`
-    - Imports the reusable module.
-
-- `<ModuleName>`.elm
-    - Contains the `Model` type for the view alone.
-    - Contains the `Msg` type for the view, and the `update` function.
-    - Contains the `view` code
-    - Contains the `decoder : Decoder Flags` and `Flags` type if necessary
-
-![Dependency Graph](./images/module-dependencies.png)
-
-## Ports
-
-### All ports should bring things in as `Json.Value`
-
-The single source of runtime errors that we have right now are through ports receiving values they shouldn't. If a `port something : Signal Int` receives a float, it will cause a runtime error. We can prevent this by just wrapping the incoming things as `Json.Value`, and handle the errorful data through a `Decoder` result instead.
-
-### Ports should always have documentation
-
-I don't want to have to go out from our Elm files to find where a port is being used most of the time. Simply adding a line or two explaining what the port triggers, or where the values coming in from a port can help a lot.
-
-
-## Model
-
-### Model shouldn't have _any_ view state within them if they aren't tied to views
-
-For example, an assignment should not have a `openPopout` attribute. Doing so means we can't use that type again in another situation.
-
-
-## Naming
-
-### Use descriptive names instead of tacking on underscores
-
-Instead of this:
+For example, do:
 
 ```elm
--- Don't do this --
-markDirty model =
-  let
-    model_ =
-      { model | dirty = True }
-  in
-    model_
+type Animal = Cat | Dog
+
+animalToString animal =
+  case animal of
+    Dog -> "dog"
+    Cat -> "cat"
 ```
 
-...just come up with a name.
+Not:
 
 ```elm
--- Instead do this --
-markDirty model =
-  let
-    dirtyModel =
-      { model | dirty = True }
-  in
-    dirtyModel
+type Animal = Cat | Dog
+
+animalToString animal =
+  case animal of
+    Dog -> "dog"
+    _ -> "cat"
 ```
-
-## Function Composition
-
-### Use anonymous function [`\_ ->`](http://elm-lang.org/docs/syntax#functions) over [`always`](http://package.elm-lang.org/packages/elm-lang/core/latest/Basics#always)
-
-It's more concise, more recognizable as a function, and makes it easier to change your mind later and name the argument.
-
-```elm
--- Don't do this --
-on "click" Json.value (always (Signal.message address ()))
-```
-
-```elm
--- Instead do this --
-on "click" Json.value (\_ -> Signal.message address ())
-```
-
-### Only use backward function application [`<|`](http://package.elm-lang.org/packages/elm-lang/core/latest/Basics#<|) when parens would be awkward
-
-Instead of this:
-
-```elm
--- Don't do this --
-foo <| bar <| baz qux
-```
-
-...prefer using parentheses, because they'd look fine:
-
-```elm
--- Instead do this --
-foo (bar (baz qux))
-```
-
-However this would be awkward:
-
-```elm
--- Don't do this --
-customDecoder string
-  (\str ->
-    case str of
-      "one" ->
-        Result.Ok 1
-
-      "two" ->
-        Result.Ok 2
-
-      "three" ->
-        Result.Ok 3
-    )
-```
-
-...so prefer this instead:
-
-```elm
--- Instead do this --
-customDecoder string
-  <| \str ->
-      case str of
-        "one" ->
-          Result.Ok 1
-
-        "two" ->
-          Result.Ok 2
-
-        "three" ->
-          Result.Ok 3
-```
-
-### Always use [`Json.Decode.Pipeline`](https://github.com/NoRedInk/elm-decode-pipeline) instead of [`mapN`](http://package.elm-lang.org/packages/elm-lang/core/latest/Json-Decode#map2)
-
-Even though this would work...
-
-```elm
--- Don't do this --
-algoliaResult : Decoder AlgoliaResult
-algoliaResult =
-  map6 AlgoliaResult
-    (field "id" int)
-    (field "name" string)
-    (field "address" string)
-    (field "city" string)
-    (field "state" string)
-    (field "zip" string)
-```
-
-...it's inconsistent with the longer decoders, and must be refactored if we want to add more fields.
-
-Instead do this from the start:
-
-```elm
--- Instead do this --
-import Json.Decode.Pipeline exposing (required, decode)
-
-algoliaResult : Decoder AlgoliaResult
-algoliaResult =
-  decode AlgoliaResult
-    |> required "id" int
-    |> required "name" string
-    |> required "address" string
-    |> required "city" string
-    |> required "state" string
-    |> required "zip" string
-```
-
-This will also make it easier to add [optional fields](http://package.elm-lang.org/packages/NoRedInk/elm-decode-pipeline/latest/Json-Decode-Pipeline#optional) where necessary.
-
-[json2elm](http://json2elm.org/) can generate pipeline-style decoders from
-raw JSON.
-
-## Syntax
-
-### Use `case..of` over `if` where possible
-
-`case..of` is clever as it will generate more efficent JS, and it also allows you to catch unmatched patterns at compile time. It's also cheap to extend this data with something more useful later on, like if you need to add another branch. This saves code diffs.
 
 ## Identifiers
 
-### Prefer the use of union types over simple types for identifiers
+Don’t use simple types or type aliases for identifiers. Creating a custom type instead enables the compiler to find bugs (like passing a user id to a function that should take an assignment id) at compile time, not in production.
 
-Using a type alias for a unique identifier allows for easy mistakes supplying any old string or integer that happens to be in scope, rather than an actual identifier. Prefer using a single case union instead:
+For example, do:
 
 ```elm
--- Don't do this --
-type alias Student =
-    { id : StudentId
-    , name : String
-    , age : Int
-    }
-
-
-type alias StudentId =
-    String
-
-getStudentDetails : StudentId -> Student
-getStudentDetails sid =
-    -- Passing a name in here by mistake will compile fine --
-    ...
+type StudentId = StudentId String
 ```
 
+Not:
+
 ```elm
--- Do this instead --
-
--- In one module file --
-module Thing.StudentId exposing (StudentId)
-
-type StudentId
-    = StudentId String
-    
--- All conversions go in this module --
-
--- In the other module file --
-module Thing.Student exposing (Student)
-
-import Thing.StudentId exposing (StudentId)
-
-type alias Student =
-    { id : StudentId
-    , name : String
-    , age : Int
-    }
-
-getStudentDetails : StudentId -> Student
-getStudentDetails sid =
-    -- The compiler will reject strings --
-    ...
+type alias StudentId = String
 ```
 
-The ID module should expose an intentionally minimal set of conversion functions:
+If you need a dict or set with `StudentId` as keys, use elm-sorter-experiment instead of the core dict and set implementations.
 
-* We should never expose conversion functions before they're needed. Start with module CustomerId exposing (CustomerId) and expand the API from there only as necessary!
-* We should avoid exposing conversion functions whose types depend on the internals of the custom type. (For example, decoder : Decoder CustomerId is great, but functions like fromInt : Int -> CustomerId make the system brittle to implementation details. Exposing an Int -> CustomerId function should be avoided unless there is a very important production reason to introduce it. If tests need an Int -> CustomerId function, they can easily write one using CustomerId.decoder and Debug.crash, since in tests Debug.crash is as harmless as any other test failure.)
+## Let bindings
 
+Avoid giant `let` bindings by pulling functions out of `let`s to the top level of the file. This helps with readability and can make it more clear what is actually going on.
 
-To use these types as keys in collections, use  [elm-sorter-experiment](https://github.com/rtfeldman/elm-sorter-experiment/). You will need to create a sorter for your identifier - the ordering may or may not be relevant for your use case.
+Another benefit is that by moving the functions to the top level, you are very likely to add type annotations. Type annotations aide in understanding how the code works!
+
+Plus, pulling out functions forces you to declare all dependencies, rather than just relying on the scope. This can lead to refactoring insights — why does x function depend on y parameter, after all?
+
+## Use anonymous function `\_ ->` over `always`
+
+It's more concise, more recognizable as a function, and makes it easier to change your mind later and name the argument.
+
+For example, do:
 
 ```elm
--- In the ID module --
-module Thing.StudentId exposing (StudentId, studentIdSorter)
+Maybe.map (\_ -> ())
+```
 
-import Sort exposing (Sorter)
--- Rest of your code... --
+Not:
 
-studentIdSorter : Sorter StudentId
-studentIdSorter =
-    Sort.by (\(StudentId sid) -> sid) Sort.alphabetical
+```elm
+Maybe.map (always ())
+```
 
--- In use: --
-module Thing.DoLogic
+## Prefer parens to backwards function application `<|`
 
-import Thing.StudentId exposing (StudentId, studentIdSorter)
-import Sort.Dict
+There are cases where it would be awkward to use parens instead of `<|` (for instance, in Elm tests), but in general, parens are preferable.
 
+For example, do:
 
+```elm
+foo (bar (baz qux))
+```
+
+Not:
+
+```elm
+foo <| bar <| baz qux
+```
+
+## Avoid unnecessary forwards function application
+
+If there’s only one step to a pipeline, is it even a pipeline? Save the forwards function application for when you’re using `andThen` (which can be confusing without it) or for when you’re doing multiple transformations.
+
+For example, do:
+
+```elm
+List.map func list
+```
+
+Not:
+
+```elm
+list |> List.map func
+```
+
+## Always use descriptive naming (even if it means names get long!)
+
+Clear, descriptive names of types, variables, and functions improve code readability. It’s much more important that code be readable than fast to type!
+
+For example, do:
+
+```elm
+viewPromptAndPassagesAccordions : Model -> Html Msg
+```
+
+Not:
+
+```elm
+accdns : Model -> Html Msg
+```
+
+For a maybe value, do:
+
+```elm
+maybeUserId : Maybe UserId
+```
+
+Not:
+
+```elm
+userId_ : Maybe UserId
+mUserId: Maybe UserId
+```
+
+(Note that in a generic function, like the internals of `Maybe.map`, a generic variable name `x` is descriptive!)
+
+## Co-locate Flags and decoders
+
+If you’re writing decoders by hand, co-locate the type you’re decoding into and its decoder.
+
+Most decoders rely on the order of values in a record type alias in order to apply values against the type alias constructor in the right order. If a type alias and the decoder that uses it aren’t co-located, it makes it more difficult to ensure that the order of items in the type alias don’t change — which could cause bugs in production!
+
+For example, do:
+
+```elm
+type alias User =
+  { name : String
+  , displayName : String
+  , interests : List Interest
+  }
+
+userDecoder : Decoder User
+userDecoder =
+  succeed User
+    |> required "name" string
+    |> required "displayName" string
+    |> required "interests" (list interestDecoder)
+
+type alias Interest =
+  { name : String
+  }
+
+interestDecoder : Decoder Interest
+interestDecoder =
+  succeed Interest
+    |> required "name" string
+```
+
+Not:
+
+```elm
+type alias User =
+  { name : String
+  , displayName : String
+  , interests : List Interest
+  }
+
+type alias Interest =
+  { name : String
+  }
+
+userDecoder : Decoder User
+userDecoder =
+  succeed User
+    |> required "name" string
+    |> required "displayName" string
+    |> required "interests" (list interestDecoder)
+
+interestDecoder : Decoder Interest
+interestDecoder =
+  succeed Interest
+    |> required "name" string
+```
+
+## Prefer explicit types in type signatures to type aliases
+
+Elm compiler error messages are better when not using type aliases. Be aware of this when writing functions.
+
+Consider doing:
+
+```elm
+func : { thing1 : String, thing2 : String } -> String
+```
+
+Rather than:
+
+```elm
+type alias FuncConfig =
+  { thing1 : String
+  , thing2 : String
+  }
+
+func : FuncConfig -> String
+```
+
+## Making impossible states impossible
+
+Some states should never occur in your program. For example, there should never be two tooltips open at once! Depending on how you model your tooltip state, the type system might or might not prevent this bad state from occurring.
+
+If you have a model with a list of assignments on it, and one assignment can have an open tooltip, your model should look like this:
+
+```elm
 type alias Model =
-    { students : Sort.Dict.Dict StudentId Student }
-
-init : List Student -> Model
-init students =
-    students
-        |> List.map (\s -> ( s.id, s ))
-        |> Sort.Dict.fromList studentIdSorter
+  { openTooltip = Maybe AssignmentId
+  , assignments = List Assignment
+  }
 ```
 
-Notice that because `Sort.Dict.Dict` is an opaque type, your `Model` (and anything which depends upon it) does not depend on `studentIdSorter`. Apart from `Sort.Dict.Dict`, there is also a `Sort.Dict.Set` type.
+Not:
 
-Code safety in situations where there are multiple types of identifiers (think of a join in SQL terms) increases dramatically with the application of this technique.
+```elm
+type alias Model =
+  { assignments = List Assignment
+  }
 
-## Code Smells
+type alias Assignment =
+  { openTooltip : Bool
+  , ...
+  }
+```
 
-### If a module has a looong list of imports, consider refactoring
+Watch [Richard Feldman’s classic talk](https://www.youtube.com/watch?v=IcgmSRJHu_8) on this topic to learn more.
 
-Having complicated imports hurts our compile time! I don't know what to say about this other than if you feel that there's something wrong with the top 40 lines of your module because of imports, then it might be time to move things out into another module. Trust your gut.
+## Being strategic about making impossible states impossible
 
-### If a function can be pulled outside of a let binding, then do it
+Making impossible states impossible is an awesome feature of a strong type system! However, it’s possible to go too far and make unlikely errors impossible at the expense of coding ergonomics and over-coupled code. This can make the codebase really hard to work with and change down the line. Sometimes ruling out one impossible state can also introduce other impossible states to the system.
 
-Giant let bindings hurt readability and performance. The less nested a function, the less functions are used in generated code.
+Let’s take [our Guided Tutorials](https://www.noredink.com/t/797) as an example. They consist of a sequence of blocks that the user goes through. Blocks can also be grouped (visually represented as white containers), so once we are done with all blocks from a group we proceed to the next one. We may be tempted to model this as:
 
-The update function is especially prone to get longer and longer: keep it as small as possible. Smaller functions that don't live in a let binding are more reusable.
+```elm
+type alias Blocks = Zipper (Zipper Block)
+```
 
-### If your application has too many constructors for your Msg type, consider refactoring
+Here, the top level zipper iterates through groups, and the inner zippers point to the current element within the group. This has some nice properties: we guarantee that containers are not empty and also also avoid (in principle) the need to handle `Maybe` values caused by having a separate `currentBlock` pointer. However, note that:
 
-Large `case..of` statements hurts compile time. It might be possible that some of your constructors can be combined, for example `type Msg = Open | Close` could actually be `type Msg = SetOpenState Bool`
+- This isn’t very ergonomic, as manipulating the data structure to advance the tutorial or modify a block’s state is really hard.
+- In our attempt to rule out an impossible state we actually introduced multiple new ones! Each one of the inner zippers now has a different pointer to its current element, and there's an implicit invariant that all of the groups we already looked at will be fully advanced already. Breaking this invariant (ie. having a non-advanced zipper for one of the previous groups) represents an impossible state!
 
+A better way to model this could be to use a grouping indicator at the moment of rendering the view in order to separate the blocks into containers:
 
-## Tooling
+```elm
+-- NOTE: this is a simplified example, not exactly how tutorials code looks.
+viewBlocks : Maybe BlockId -> List Block -> Html Msg
+viewBlocks currentBlockId blocks =
+  Html.div []
+    (blocks
+      |> List.Extra.groupBy .groupId
+      |> List.map (viewContainer currentBlockId)
+    )
+```
 
-### Use [`elm-init-scripts`](https://github.com/NoRedInk/elm-init-scripts) to start your projects
+This has the added benefit that our code will be more stable, in the sense that a the model isn't as coupled to the view as it was before. A whole class of changes to the view can now be implemented locally in the `view` code without having to change the fundamental data structure our whole program is built upon.
 
-This will generate all the files mentioned [above](#how-to-structure-modules-for-a-page) for you.
+## Handling errors
 
-### Use [`elm-ops-tooling`](https://github.com/NoRedInk/elm-ops-tooling) to manage your projects
+It’s alright for things to go wrong in a program. It is going to happen! What’s important is that we show clear and specific error messages to the user when this does occur (and that we report some of these errors to our error-tracking service!).
 
-In particular, use `elm_deps_sync` to keep your main elm-package.json in sync with your test elm-package.json.
+## When to create a separate module
 
-### Use [`elm-format`](https://github.com/avh4/elm-format) on all files
+### Don’t break up modules based on the “shape” of things
 
-We run the latest version of [`elm-format`](https://github.com/avh4/elm-format) to get uniform syntax formatting on our source code.
+Anti-patterns:
 
-This has [several benefits](https://github.com/avh4/elm-format#elm-format),
-not the least of which is that it renders many potential style discussions moot,
-making it easier to spend more time building things!
+- `Foo.Model`
+- `Foo.Msgs`
+- `Foo.Update`
+- `Foo.View`
+- `Foo.Validation`
+
+Watch [“The Life of a File”](https://www.youtube.com/watch?v=XpDsk374LDE) to learn about this concept in more depth.
+
+Break up modules when you want to avoid invalid states
+A good example is [`Percent`](https://github.com/NoRedInk/NoRedInk/blob/3caa7e9e24c7086687f687275e8d51dcb511f82a/monolith/ui/src/Percent.elm). Notice how it doesn’t expose a constructor for `Percent`, but exposes functions to create a `Percent`, i.e. `fromInt`.
+
+If there was an exposed constructor for `Percent`, you could create a invalid percent `Percent (-1)`
+
+### Adding extras to an already existing type Foo.Extra
+
+Adding extras to a type can quickly get out of hand and it might become hard for future engineers to understand what a function does without constantly having to look up extras.
+Generally it’s better to rely on already existing functions that are familiar to most engineers.
+Only consider adding a new extra function if you’ve reused it in multiple places for multiple features. It’s okay to keep an extra function local to its usage until it has “proven” itself. Often such functions miss edge-cases or under go multiple naming iterations initially and it’s better to wait before moving it to a more general place.
+
+### Extra2
+
+We have some modules that add extras to module that are already open-sourced and established in the elm community i.e. `List.Extra` we have some additional extras in `List.Extra2`.
+Whenever possible try to avoid this and instead contribute to the open-sourced version. This has the additional benefit of getting feedback from a broader audience.
+
+## One Elm app per page
+
+Avoid having multiple Elm entrypoints on a single page, as it messes up our ability to handle state well. For example, only 1 tooltip should be open at a time, but there’s no way to enforce this in the type system when there are multiple Elm apps running.

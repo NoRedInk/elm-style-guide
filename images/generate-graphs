@@ -1,2 +1,0 @@
-#!/bin/sh
-dot -Tpng -o module-dependencies.png module-dependencies.dot
